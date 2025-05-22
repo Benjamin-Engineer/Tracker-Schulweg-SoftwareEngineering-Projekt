@@ -45,13 +45,14 @@ else:
     print(listendatei, "enthält keine Daten.")
 
 
+
 # Überordner der Routendatei
 # Wenn der Ordner nicht existiert, wird er erstellt
 parent_folder = "2001-01-01"
 # Fügt alle Koordinaten-Paare aus der Liste 'daten' 
 # mit den zugehörigen Zeitstempeln (aus testdaten.txt generiert) 
 # zur Route in der Datei 11-11-11.json hinzu.
-# Wenn es die Datei 11-11-11.json nicht gibt, wird eine erstellt
+# Wenn es die Datei 11-11-11.json nicht gibt, wird sie erstellt
 if daten:
     for i in range(0, len(daten), 2):
         coords_str = daten[i]
