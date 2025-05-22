@@ -1,11 +1,12 @@
 import serial
 import pynmea2
 from dateifunktionen import gps_json_write
+from datetime import datetime
+
+systime = str(datetime.now())
+
 
 gps = serial.Serial('/dev/ttyAMA0', baudrate=9600, timeout=1)
-GPPGA_buffer = 0
-NMEA_buffer = 0
-
 
 while True:
              
@@ -31,6 +32,11 @@ while True:
         
         #print(date, time)
 
-    gps_json_write(lat, lon, date, time)
-    
-    
+
+    try:
+        coord = lat + lon
+        gps_json_write(coord, time, systime, date) # Koordinaten, Zeit, Dateiname, Ordner
+    except:
+        gps_json_write("NO SIGNAL", systime, "ERROR", "Errors") # Meldung, Zeit, Dateiname, Ordner
+
+
