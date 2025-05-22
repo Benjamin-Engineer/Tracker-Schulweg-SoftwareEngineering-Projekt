@@ -3,13 +3,13 @@ import pynmea2
 from dateifunktionen import gps_json_write
 from datetime import datetime
 
-systime = str(datetime.now())
-
+starttime = str(datetime.now()) # Startzeit des Programmes
 
 gps = serial.Serial('/dev/ttyAMA0', baudrate=9600, timeout=1)
 
 while True:
-             
+    systime = str(datetime.now())
+    
     received_data = gps.readline().decode('ascii', errors="replace")
     GPGGA_DATA = received_data.find('$GPGGA,')
     GPRMC_DATA = received_data.find('$GPRMC,')
@@ -22,7 +22,8 @@ while True:
         lon = str(msg_local.longitude)
         
         #print(lat, lon)
-        
+
+
     elif GPRMC_DATA == 0:
         
         msg_chrono = pynmea2.parse(received_data)
@@ -35,8 +36,8 @@ while True:
 
     try:
         coord = lat + " " + lon
-        gps_json_write(coord, time, systime, date) # Koordinaten, Zeit, Dateiname, Ordner
+        gps_json_write(coord, systime, starttime, date) # Koordinaten, Zeit, Dateiname, Ordner
     except:
-        gps_json_write("NO SIGNAL", systime, "ERROR", "Errors") # Meldung, Zeit, Dateiname, Ordner
+        gps_json_write("NO SIGNAL", systime, starttime, "Error Log") # Meldung, Zeit, Dateiname, Ordner
 
 
