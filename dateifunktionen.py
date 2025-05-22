@@ -1,18 +1,23 @@
 import json
 import os # path operations & folder creation
+from datetime import datetime
 
-def gps_json_write(coordinates_str, timestamp_str, filename, folder="."):
+
+def gps_json_write(coordinates_str, timestamp_str,  folder=".", filename=str(datetime.now()).replace(":", "-").replace(".", "-") + ".json"):
     """
     Fügt einen neuen Eintrag (Koordinaten und Zeit) zu einer JSON-Datei hinzu.
     Wenn die Datei nicht existiert, wird eine neue erstellt.
     Falls die Datei leer ist, wird eine neue Liste erstellt.
 
+    Falls nicht angegeben: Dateiname = YYYY-MM-DD HH-MM-SS.json, Ordner = selber Ordner wie Program
+
     Args:
-        coordinates_str (str): Die Koordinaten als String (z.B. "lat long").
+        coordinates_str (str): Die Koordinaten als String (z.B. "50.74270766666667 7.066976833333333").
         timestamp_str (str): Der Zeitstempel als String. (z.B.2025-05-21 20:04:28+00.00)
-        filename (str): Der Name der JSON-Datei (z.B. "11-11-11.json").
+        filename (str): Der Name der JSON-Datei (z.B. "23-22-21.json").
         folder (str, optional): Der Ordner, in dem die Datei gespeichert werden soll. Standardmäßig der aktuelle Ordner (".").
     """
+
     # Ensure the target folder exists, create it if it doesn't
     if not os.path.exists(folder):
         try:

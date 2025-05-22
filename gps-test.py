@@ -1,10 +1,17 @@
-from datetime import datetime
+import datetime
 from dateifunktionen import gps_json_write #Custom Import. Kann kaputtgehen wenn die Routendatei umbenannt wird
 
 
 def load_data_from_file(filepath):
-    # Liest Daten aus einer angegebenen .txt-Datei aus und gibt sie als Liste zurück, die von "dateifunktionen" verwendet werden kann.
-    # Ausgabeformat: [coords, timestamp, coords, timestamp, ...]. Beispiel: ["50.74271683333333 7.0670345","2025-05-21 20:04:28+00.00","50.74271683333333 7.0670345","2025-05-21 20:04:29+00.00"]
+    """Liest Daten aus einer angegebenen .txt-Datei aus und gibt sie als Liste zurück, die von "dateifunktionen" verwendet werden kann.
+    Ausgabeformat: [coords, timestamp, coords, timestamp, ...].
+    Beispiel:
+    ["50.74271683333333 7.0670345",
+    "2025-05-21 20:04:28+00.00",
+    "50.74271683333333 7.0670345",
+    "2025-05-21 20:04:29+00.00"]
+    usw.
+    """
     new_data_list = []
     try:
         with open(filepath, 'r') as f:
@@ -46,16 +53,22 @@ else:
 
 
 
-# Überordner der Routendatei
+
+# Ordner der Routendatei
 # Wenn der Ordner nicht existiert, wird er erstellt
-parent_folder = "2001-01-01"
-# Fügt alle Koordinaten-Paare aus der Liste 'daten' 
-# mit den zugehörigen Zeitstempeln (aus testdaten.txt generiert) 
-# zur Route in der Datei 11-11-11.json hinzu.
-# Wenn es die Datei 11-11-11.json nicht gibt, wird sie erstellt
+parent_folder = str(datetime.date.today())
+"""
+Fügt alle Koordinaten-Paare aus der Liste 'daten' mit den zugehörigen Zeitstempeln (aus testdaten.txt generiert) zur Route in der Datei hinzu.
+Ist keine Datei angegeben oder existiert die angegeben Datei nicht, wird automatisch eine neue Datei mit aktueller Zeit als Namen erstellt.
+"""
 if daten:
     for i in range(0, len(daten), 2):
         coords_str = daten[i]
         time_str = daten[i+1]
 
-        gps_json_write(coords_str, time_str, "11-11-11.json",parent_folder)
+# BEISPIELE (Hasttag entfernen zum ausprobieren):
+        gps_json_write(coords_str, time_str, parent_folder) # Erzeugt eine neue Datei mit aktueller Zeit als Namen im Ordner parent_folder.
+        #gps_json_write(coords_str, time_str) # Erzeugt eine neue Datei im gleichen Ordner wie dieses Programm
+        #gps_json_write (coords, time_str, parent_folder, "Name") # Erzeugt eine neue Datei Name.json in parent_folder
+        #gps_json_write (coords, time_str, "Name") # Erzeugt eine neue Datei Name.json im gleichen Ordner
+        #gps_json_write (coords, time_str, "Beispielordner", "Name") # Erzeugt eine neue Datei Name.json im Ordner Beispielordner

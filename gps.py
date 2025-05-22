@@ -36,8 +36,8 @@ while True:
 
     try:
         coord = lat + " " + lon
-        gps_json_write(coord, systime, starttime, date) # Koordinaten, Zeit, Dateiname, Ordner
+        gps_json_write(coord, systime, date, starttime) # Koordinaten, Zeit, Ordner, Dateiname
     except:
-        gps_json_write("NO SIGNAL", systime, starttime, "Error Log") # Meldung, Zeit, Dateiname, Ordner
+        gps_json_write("NO SIGNAL", systime, "Error Log", starttime) # Meldung, Zeit, Ordner, Dateiname
 
 
