@@ -16,13 +16,16 @@ while True:
         
         msg_local = pynmea2.parse(received_data)
         
-        lat = msg_local.latitude
-        lon = msg_local.longitude
+        lat = str(msg_local.latitude)
+        lon = str(msg_local.longitude)
         
+        #print(lat, lon)
         
     elif GPRMC_DATA == 0:
         
         msg_chrono = pynmea2.parse(received_data)
         
-        date = msg_chrono.datestamp
-        time = msg_chrono.timestamp
+        date = str(msg_chrono.datestamp)
+        time = str(msg_chrono.timestamp)
+        
+        #print(date, time)
