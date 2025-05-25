@@ -1,0 +1,50 @@
+import os #Importiert OS-Bibliothek für das Arbeiten mit Dateisystemen
+import json
+from datetime import datetime
+
+PLANNER_FILE = "planner.json"
+
+
+def load_entries(): # Lädt daten der JSON-File
+    if not os.path.exists(PLANNER_FILE):
+        return [] # Falls keine file existiert, wird leere liste zurückgegeben
+    with open(PLANNER_FILE, "r") as f:
+        return json.load(f)
+    
+def save_entries(start, end):
+    entries = load_entries()
+    
+    entry = {
+        "von": start,  
+        "bis": end
+        }
+    
+    entries.append(entry) # Erweiter liste um neuen eintrag
+    
+    entries.sort(key=lambda entry:entry["von"]) # Sortiert daten Chronologisch anhand "von"
+    
+    # speichern der Liste zurück in die Datei
+    with open(PLANNER_FILE, "w") as f:
+        json.dump(entries, f, indent=2)
+
+        
+def show_planner_entries():
+    for entry in load_entries():
+        print(f"Von: {entry['von']} Bis: {entry['bis']}")
+    
+
+
+while True:
+    auswahl = input("Eintrag hinzufügen (a), anzeigen(z), beenden(b)")
+    if auswahl == "a":
+        von = input(str("Von: "))
+        bis = input(str("Bis: "))
+        save_entries(von, bis)
+    elif auswahl == "z":
+        show_planner_entries()
+    elif auswahl == "b":    
+        break
+        
+"""print("Gespeicherte Termine: ")
+for t in load_entries():
+    print(t)"""
