@@ -1,2 +1,11 @@
-# Tracker-Schulweg-SoftwareEngineering-Projekt
-Repository für das Projekt im Modul Grundlagen des Software Engineering über ein Tracker für den Schulweg von Schülern
+**SCRUM-48 && SCRUM-25**
+
+gps_json_write Eingabeparameter: Koordinaten, Zeitstempel, (Ordner), (Dateiname)
+
+Die Eingabeparameter in Klammern sind optional.
+
+Falls nicht angegeben, sind die Standardparameter folgende:
+- Ordner: der gleiche Ordner wie das ausgeführte Program
+- Dateiname: aktuelle Zeit im Format "YYYY-MM-DD HH-MM-SS.json"
+
+In gps-test.py stehen Beispiele zur Anwendung von gps_json_write zur Verfügung.
