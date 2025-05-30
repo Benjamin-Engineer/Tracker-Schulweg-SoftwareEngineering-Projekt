@@ -10,7 +10,7 @@ starttime = str(datetime.now()) # Startzeit des Programmes
 gps = serial.Serial('/dev/ttyAMA0', baudrate=9600, timeout=1)
 
 def tracker():
-    while True:
+    while is_recording == True:
         systime = str(datetime.now())
 
         received_data = gps.readline().decode('ascii', errors="replace")
@@ -44,6 +44,4 @@ def tracker():
         except:
             gps_json_write("NO SIGNAL", systime, "Error Log", starttime) # Meldung, Zeit, Ordner, Dateiname
 
-
-if is_recording == True:
-    tracker()
+tracker()
