@@ -30,21 +30,5 @@ def save_entries(start, end):
         
 def show_planner_entries():
     for entry in load_entries():
-        print(f"Von: {entry['von']} Bis: {entry['bis']}")
+        print(f"Von: {entry['von']} Bis: {entry['bis']}") #"Abändern mit tk-inter tabelle für visualisierung"
     
-
-
-while True:
-    auswahl = input("Eintrag hinzufügen (a), anzeigen(z), beenden(b)")
-    if auswahl == "a":
-        von = input(str("Von: "))
-        bis = input(str("Bis: "))
-        save_entries(von, bis)
-    elif auswahl == "z":
-        show_planner_entries()
-    elif auswahl == "b":    
-        break
-        
-"""print("Gespeicherte Termine: ")
-for t in load_entries():
-    print(t)"""

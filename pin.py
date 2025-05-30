@@ -21,24 +21,17 @@ def set_pin(new_pin): # Setzt neue PIN über das eingabe fenster
 
 def change_pin(alte_pin, new_pin, confirm_pin): # Ändert die PIN
     if check_pin(alte_pin):
-        if new_pin == confirm_pin:
+        if new_pin == confirm_pin: 
             if new_pin.isdigit() or len(new_pin) < 6:
-                set_pin(new_pin)
+                set_pin(new_pin) #speichern der neuen pin und überschreiben der alten
                 print("PIN wurde erfolgreich geändert.")
                 return True
-            else:
+            else: # Kriterien wurden nicht erfüllt
                 print("PIN erfüllt nicht die Kriterien")
                 return False
-        else:
+        else: # confirm_pin != new_pin
             print("Pin stimmt nicht überein")
             return False
-    else:
+    else: # falsche PIN zum überprüfen eingegeben.
         print("PIN ist falsch")
         return False
-
-default_pin()
-#check_pin(input("PIN eingeben: "))
-#change_pin(input("Alte PIN eingeben: "), input("Neue PIN eingeben: "), input("Neue PIN bestätigen: "))
-#set_pin(input("Neue PIN eingeben: "))
-#get_pin()
-#check_pin()
