@@ -18,6 +18,17 @@ def gps_json_write(coordinates_str, timestamp_str,  folder=".", filename=str(dat
         folder (str, optional): Der Ordner, in dem die Datei gespeichert werden soll. Standardmäßig der aktuelle Ordner (".").
     """
 
+    # Formatiere coordinates_str auf 6 Nachkommastellen pro Koordinate (laut https://wiki.openstreetmap.org/wiki/Precision_of_coordinates ist das auf 0.11112m genau, das sollte reichen)
+    try:
+        lat_str, lon_str = coordinates_str.split()
+        lat = float(lat_str)
+        lon = float(lon_str)
+        coordinates_str = f"{lat:.6f} {lon:.6f}"
+    except ValueError:
+        # coordinates_str enthält keine Koordinaten, z.B. "NO SIGNAL" Eintrag
+        # Eintrag wird übernommen und Konsolenrückmeldung gegeben
+        print ("coordinates_str enthält keine Koordinaten und wird unaufbereitet übernommen.")
+
     # Ensure the target folder exists, create it if it doesn't
     if not os.path.exists(folder):
         try:
