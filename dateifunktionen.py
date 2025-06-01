@@ -18,16 +18,25 @@ def gps_json_write(coordinates_str, timestamp_str,  folder=".", filename=str(dat
         folder (str, optional): Der Ordner, in dem die Datei gespeichert werden soll. Standardmäßig der aktuelle Ordner (".").
     """
 
-    # Formatiere coordinates_str auf 6 Nachkommastellen pro Koordinate (laut https://wiki.openstreetmap.org/wiki/Precision_of_coordinates ist das auf 0.11112m genau, das sollte reichen)
+    original_coordinates_str = coordinates_str  # Keep for messages
+
+    final_coord_str_to_write = original_coordinates_str  # Default if not parsable
+    current_f_lat, current_f_lon = None, None
+    is_current_coord_valid_for_comparison = False
+
+    # Attempt to parse original_coordinates_str and format to 6 decimal places. (6 Nachkommastellen sind auf 0.11112m genau, laut https://wiki.openstreetmap.org/wiki/Precision_of_coordinates)
+    # Also, get float versions of these 6-decimal-place values for comparison.
     try:
-        lat_str, lon_str = coordinates_str.split()
-        lat = float(lat_str)
-        lon = float(lon_str)
-        coordinates_str = f"{lat:.6f} {lon:.6f}"
+        raw_lat_str, raw_lon_str = original_coordinates_str.split()
+        raw_lat = float(raw_lat_str)
+        raw_lon = float(raw_lon_str)
+        
+        final_coord_str_to_write = f"{raw_lat:.6f} {raw_lon:.6f}"
+        current_f_lat = float(f"{raw_lat:.6f}") # Float from 6-decimal representation
+        current_f_lon = float(f"{raw_lon:.6f}") # Float from 6-decimal representation
+        is_current_coord_valid_for_comparison = True
     except ValueError:
-        # coordinates_str enthält keine Koordinaten, z.B. "NO SIGNAL" Eintrag
-        # Eintrag wird übernommen und Konsolenrückmeldung gegeben
-        print ("coordinates_str enthält keine Koordinaten und wird unaufbereitet übernommen.")
+        print (f"Info: Eingabe '{original_coordinates_str}' enthält keine validen Koordinaten und wird unaufbereitet übernommen.")
 
     # Ensure the target folder exists, create it if it doesn't
     if not os.path.exists(folder):
@@ -53,8 +62,32 @@ def gps_json_write(coordinates_str, timestamp_str,  folder=".", filename=str(dat
     except json.JSONDecodeError:
         print(f"Warnung: Datei {full_path} enthielt ungültiges JSON oder war leer. Eine neue Liste wird erstellt.")
 
+    # Check for deviation if current coordinates are valid for comparison and there's previous data
+    if is_current_coord_valid_for_comparison and existing_data:
+        last_entry = existing_data[-1]
+        last_coords_str_from_file = last_entry.get("coord")
+
+        if last_coords_str_from_file:
+            try:
+                # Previous coordinates from file (should already be 6dp if valid)
+                last_lat_str_ff, last_lon_str_ff = last_coords_str_from_file.split() # ff = from file
+                last_f_lat = float(last_lat_str_ff)
+                last_f_lon = float(last_lon_str_ff)
+
+
+
+                culling_accuracy = 0.00001 # 0.00001 = 0.11112m <-> 0.0001 = 1.1112m <-> 0.001 = 11.112m (laut https://wiki.openstreetmap.org/wiki/Precision_of_coordinates)
+
+                if abs(current_f_lat - last_f_lat) < culling_accuracy and abs(current_f_lon - last_f_lon) < culling_accuracy:
+                    print(f"Info: Neuer Eintrag (Original: '{original_coordinates_str}', Formatiert: '{final_coord_str_to_write}') weicht minimal von letztem Eintrag ('{last_coords_str_from_file}') ab. Eintrag wird übersprungen.")
+                    return # Do not add the new entry
+            except ValueError:
+                # Last coordinate in file was not a valid parsable pair (e.g., "NO SIGNAL").
+                # Proceed to add the new one if it's valid.
+                pass
+
     new_entry = {
-        "coord": coordinates_str,
+        "coord": final_coord_str_to_write,
         "time": timestamp_str
     }
     existing_data.append(new_entry)
