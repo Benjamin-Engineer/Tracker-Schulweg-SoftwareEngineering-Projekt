@@ -23,4 +23,14 @@ planner.py
     Die funktion save_entries(startzeit, endzeit) erweitert die bestehende Liste um das hinzugefügte element (von, bis). Die einträge werden Sortiert nach "von" an die JSON-Datei übergeben.
     Über show_planner_entries(), wird auf die Funktion load_entries() zugegriffen und die visualisierung der Liste ermöglicht.
 
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+start_stop.py
+    Hinzufügen einer toggle funktion für die Start-Stop aktivität
+
+        falls is_recording == true -> aktives tracking
+        falls is_recording == false -> kein aktives tracking
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
