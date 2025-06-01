@@ -1,47 +1,37 @@
-import serial
-import pynmea2
-from dateifunktionen import gps_json_write
-from datetime import datetime
+import os #Importiert OS-Bibliothek für das Arbeiten mit Dateisystemen
 
-from start_stop import is_recording
+PIN_FILE = "pin.txt"
 
-starttime = str(datetime.now()) # Startzeit des Programmes
+def default_pin(): # Setzt die Standard PIN zu 
+    if not os.path.exists(PIN_FILE):
+        with open(PIN_FILE, "w") as f:
+            f.write("000000") # Legt standard pin auf "000000"
 
-gps = serial.Serial('/dev/ttyAMA0', baudrate=9600, timeout=1)
+def get_pin(): # Lädt die PIN aus der Datei
+    with open(PIN_FILE, "r") as f:
+        f_contents = f.read()
+        return f_contents
 
-def tracker():
-    while is_recording == True:
-        systime = str(datetime.now())
+def check_pin(entered_pin): # Vergleicht eingegebene PIN mit gespeicherter PIN
+    return entered_pin == get_pin()
 
-        received_data = gps.readline().decode('ascii', errors="replace")
-        GPGGA_DATA = received_data.find('$GPGGA,')
-        GPRMC_DATA = received_data.find('$GPRMC,')
+def set_pin(new_pin): # Setzt neue PIN über das eingabe fenster
+    with open(PIN_FILE, "w") as f:
+        f.write(new_pin)
 
-        if GPGGA_DATA == 0:
-
-            msg_local = pynmea2.parse(received_data)
-
-            lat = str(msg_local.latitude)
-            lon = str(msg_local.longitude)
-
-            #print(lat, lon)
-
-
-        elif GPRMC_DATA == 0:
-
-            msg_chrono = pynmea2.parse(received_data)
-
-            date = str(msg_chrono.datestamp)
-            time = str(msg_chrono.timestamp)
-
-            #print(date, time)
-
-
-        
-        try:
-            coord = lat + " " + lon
-            gps_json_write(coord, systime, date, starttime) # Koordinaten, Zeit, Ordner, Dateiname
-        except:
-            gps_json_write("NO SIGNAL", systime, "Error Log", starttime) # Meldung, Zeit, Ordner, Dateiname
-
-tracker()
+def change_pin(alte_pin, new_pin, confirm_pin): # Ändert die PIN
+    if check_pin(alte_pin):
+        if new_pin == confirm_pin: 
+            if new_pin.isdigit() or len(new_pin) < 6:
+                set_pin(new_pin) #speichern der neuen pin und überschreiben der alten
+                print("PIN wurde erfolgreich geändert.")
+                return True
+            else: # Kriterien wurden nicht erfüllt
+                print("PIN erfüllt nicht die Kriterien")
+                return False
+        else: # confirm_pin != new_pin
+            print("Pin stimmt nicht überein")
+            return False
+    else: # falsche PIN zum überprüfen eingegeben.
+        print("PIN ist falsch")
+        return False
