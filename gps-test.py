@@ -2,6 +2,13 @@ import datetime
 from dateifunktionen import gps_json_write #Custom Import. Kann kaputtgehen wenn die Routendatei umbenannt wird
 
 
+
+# Welche Testdatendatei soll verwendet werden?
+listendatei = "testdaten_extrapoliert.txt"
+#listendatei = "testdaten.txt"
+
+
+
 def load_data_from_file(filepath):
     """Liest Daten aus einer angegebenen .txt-Datei aus und gibt sie als Liste zurück, die von "dateifunktionen" verwendet werden kann.
     Ausgabeformat: [coords, timestamp, coords, timestamp, ...].
@@ -35,10 +42,9 @@ def load_data_from_file(filepath):
         print(f"An error occurred while reading '{filepath}': {e}. 'daten' will be empty.")
     return new_data_list
 
-# Load data from testdaten.txt instead of using a hardcoded list
-listendatei = "testdaten.txt"
-daten = load_data_from_file(listendatei) # testdaten.txt muss sich im gleichen Ordner wie gps-test.py befinden
 
+
+daten = load_data_from_file(listendatei) # testdaten.txt muss sich im gleichen Ordner wie gps-test.py befinden
 
 def gps_test(data_list):
     # Using enumerate for a cleaner loop
