@@ -6,5 +6,6 @@ start_stop.py
     Hinzufügen einer toggle funktion für die Start-Stop aktivität
 
         falls is_recording == true -> aktives tracking
-
         falls is_recording == false -> kein aktives tracking
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
