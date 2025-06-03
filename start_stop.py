@@ -5,7 +5,6 @@ from gps import tracker
 is_recording = False
 now = datetime.datetime.now().time()
 
-plan = load_entries()
 
 def toggle_status(): # Button Funktion zum ändern des aufzeichen von Aktiv -> Inaktiv -> Aktiv ...
     global is_recording
@@ -15,7 +14,8 @@ def toggle_status(): # Button Funktion zum ändern des aufzeichen von Aktiv -> I
     while is_recording:
         tracker()
     
-def automatic_start_stop(plan):
+def automatic_start_stop():
+    plan = load_entries()
     for eintrag in plan:
         von = datetime.datetime.strptime(eintrag["von"], "%H:%M").time() # Wandelt 'von' einträge des Planers in datetime um
         bis = datetime.datetime.strptime(eintrag["bis"], "%H:%M").time() # Wandelt 'bis' einträge des Planers in datetime um   
