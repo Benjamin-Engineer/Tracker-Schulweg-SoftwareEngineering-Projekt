@@ -1,7 +1,7 @@
 import datetime
 import dateifunktionen # Benutzerdefinierter Import. Kann fehlschlagen, wenn dateifunktionen.py umbenannt wird.
 
-# from dateifunktionen import gps_json_write, get_standorte # Custom Import
+
 
 # Welche Testdatendatei soll verwendet werden?
 listendatei = "testdaten_extrapoliert.txt"
@@ -46,6 +46,9 @@ def load_data_from_file(filepath):
 
 daten = load_data_from_file(listendatei) # testdaten.txt muss sich im gleichen Ordner wie gps-test.py befinden
 
+
+
+
 def gps_test(data_list):
     # Verwendung von enumerate für eine sauberere Schleife
     for i, item in enumerate(data_list):
@@ -56,6 +59,8 @@ if daten:
     gps_test(daten)
 else:
     print(listendatei, "enthält keine Daten.")
+
+
 
 # Ordner der Routendatei
 # Wenn der Ordner nicht existiert, wird er erstellt
@@ -69,12 +74,16 @@ if daten:
         coords_str = daten[i]
         time_str = daten[i+1]
 
+
+
 # BEISPIELE (Hashtag entfernen zum Ausprobieren):
         dateifunktionen.gps_json_write(coords_str, time_str, parent_folder) # Erzeugt eine neue Datei mit aktueller Zeit als Namen im Ordner parent_folder.
         #dateifunktionen.gps_json_write(coords_str, time_str) # Erzeugt eine neue Datei im gleichen Ordner wie dieses Programm
         #dateifunktionen.gps_json_write (coords, time_str, parent_folder, "Name") # Erzeugt eine neue Datei Name.json in parent_folder
         #dateifunktionen.gps_json_write (coords, time_str, "Name") # Erzeugt eine neue Datei Name.json im gleichen Ordner
         #dateifunktionen.gps_json_write (coords, time_str, "Beispielordner", "Name") # Erzeugt eine neue Datei Name.json im Ordner Beispielordner
+
+
 
 # Standorte als Liste ausgeben (bereits nach Anforderungen des Pflichtenheftes sortiert, jeder Standorteintrag besteht aus Koordinatenstring, Name (falls unbenannt: "none") und Timestamp)
 print("STANDORTLISTE:")
