@@ -1,51 +1,76 @@
 # Tracker-Schulweg-SoftwareEngineering-Projekt
-Repository für das Projekt im Modul Grundlagen des Software Engineering über ein Tracker für den Schulweg von Schülern
+Repository für das Projekt im Modul "Grundlagen des Software Engineering" über einen Tracker für den Schulweg von Schülern.
 
 dateifunktionen.py
 
-    gps_json_write(): Die Eingabeparameter (Koordinaten, Zeitstempel, "Optional:(Ordner, Dateiname)")
-      Die Standartparameter wären: 
-      "Ordner" : der gleiche Ordner wie das ausgeführte Program
-      "Dateiname" : aktuelle Zeit im Format "YYYY-MM-DD HH-MM-SS.json"
+    gps_json_write(Koordinaten, Zeitstempel, "Optional:Ordner", "Optional:Dateiname", "Optional:Culling-Toleranz", "Optional:Standorterkennungszeit")
+      Formatiert die angegebenen Koordinaten sowie den Zeitstempel und schreibt sie in eine JSON-Routendatei. Gegebenenfalls wird eine neue Datei erstellt.
+      Erkennt Standorte und erstellt automatisch Standortdateien für diese im Standardordner von `erstelle_standortdatei` (siehe weiter unten).
+      Standardparameter:
+      "Ordner" : der gleiche Ordner wie das ausgeführte Programm.
+      "Dateiname" : aktuelle Zeit im Format "YYYY-MM-DD_HH-MM-SS.json".
+      "Culling-Toleranz": 0.0001 (entspricht 1,1112 Metern).
+      "Standorterkennungszeit": 15 (Angabe in Minuten; 15 Minuten sind im Pflichtenheft spezifiziert).
+    
+    erstelle_standortdatei(Koordinaten, Zeitstempel, "Optional:Ordner")
+        Erstellt eine Standortdatei (.txt) mit den angegebenen Koordinaten und dem Zeitstempel.
+        Der Speicherordner kann beim Aufruf angepasst werden (für dieses Projekt nicht notwendig).
+        Standardparameter:
+        "Ordner" : "Standorte"-Ordner im aktuellen Dateipfad
+
+    benenne_standort(Neuer Name, Dateiname, "Optional:Ordner")
+        Weist dem Standort der ausgewählten Standortdatei einen neuen Namen zu.
+        Optional kann der Ordner ausgewählt werden, in dem sich die Datei befindet, sollte sie sich nicht im Standardordner befinden.
+        Standardparameter:
+        "Ordner" : "Standorte"-Ordner im aktuellen Dateipfad
+
+    get_standorte("Optional:Ordner") 
+        Gibt eine Liste aller Standorte im Standardordner (oder, falls angegeben, im ausgewählten Ordner) zurück.
+        Die Standorte in der Liste werden automatisch gemäß den Anforderungen des Pflichtenhefts sortiert:
+        Zuerst alle unbenannten Standorte in chronologischer Reihenfolge, danach alle benannten Standorte in alphabetischer Reihenfolge.
+        Die Einträge der Liste haben jeweils das Format (Koordinaten, Name, Zeitstempel), wobei der Eintrag "Name" mit "None" gekennzeichnet ist, wenn der Standort noch nicht benannt wurde (Rot auf der Karte anzeigen).
+        Standardparameter:
+        "Ordner" : "Standorte"-Ordner im aktuellen Dateipfad
+
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   gps.py
       
-      Erfasst die von GPS gesendeten Daten wie Koordinaten und zeitstempel
+      Erfasst die vom GPS gesendeten Daten wie Koordinaten und Zeitstempel.
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 pin.py 
 
-    Erstellt eine standard pin für das Sicherheitsverfahren über default_pin() und speichert diese in einer text.file.
+    Erstellt eine Standard-PIN für das Sicherheitsverfahren über `default_pin()` und speichert diese in einer Textdatei.
     Über get_pin() wird die PIN aus der Datei ausgelesen.
-    Vergeleicht eingegebene PIN mit vorhandener pin, über check_pin(entered_pin), hier wurd get_pin() aufgerufen, wenn beide übereinstimmen wird ein True wert zurückgegeben,sonst False
-    Setzt einen neuen PIN in der pin.txt Datei und überschreibt den alten, mit set_pin(new_pin) 
-    Über change_pin(alte_pin, new_pin, corfim_pin) wird die pin geändert.
+    Vergleicht die eingegebene PIN mit der vorhandenen PIN über `check_pin(entered_pin)`. Hier wird `get_pin()` aufgerufen. Wenn beide übereinstimmen, wird `True` zurückgegeben, sonst `False`.
+    Setzt eine neue PIN in der Datei `pin.txt` und überschreibt die alte mit `set_pin(new_pin)`.
+    Über `change_pin(alte_pin, new_pin, confirm_pin)` wird die PIN geändert.
     
-        hierfür wird eine Abfrage des Alten PIN's über check_pin(alte_pin) getätigt, sobald dieser korrekt ist wird die eingabe eines Neuen pins mit dessen 
-        Confirmation ermöglicht. Stimmen beide überein und die Kriterien für den PIN sind erfüllt (nur Nummern und mindestens 6 zeichen), wird die PIN 
-        über set_pin(new_pin) in die pin.txt datei gespeichert und die Alte überschrieben.
-        Zur aufklärung, die variable alte_pin wird für die Aktuelle noch gespeicherte PIN genutzt new_pin ist dann die gewünschte neue PIN und mit confirm_pin ist die neue PIN nur wiederholt als sicherheits schritt.
+        Hierfür wird eine Abfrage der alten PIN über `check_pin(alte_pin)` getätigt. Sobald diese korrekt ist, wird die Eingabe einer neuen PIN mit deren 
+        Bestätigung ermöglicht. Stimmen beide überein und sind die Kriterien für die PIN erfüllt (nur Ziffern und mindestens 6 Zeichen), wird die PIN 
+        über `set_pin(new_pin)` in der Datei `pin.txt` gespeichert und die alte überschrieben.
+        Zur Aufklärung: Die Variable `alte_pin` wird für die aktuell noch gespeicherte PIN genutzt, `new_pin` ist dann die gewünschte neue PIN und `confirm_pin` ist die wiederholte Eingabe der neuen PIN als Sicherheitsschritt.
 
-    Daraus folgt, dass die default_pin() zu beginn laufen muss, am besten direkt beim starten des Gerätes.
+    Daraus folgt, dass `default_pin()` zu Beginn ausgeführt werden muss, am besten direkt beim Starten des Geräts.
 
     
 planner.py
 
-    Über load_entries() werden die einträge des Planners aus der JSON-Datei geladen.
-    Die funktion save_entries(startzeit, endzeit) erweitert die bestehende Liste um das hinzugefügte element (von, bis). Die einträge werden Sortiert nach "von" an die JSON-Datei übergeben.
-    Über show_planner_entries(), wird auf die Funktion load_entries() zugegriffen und die visualisierung der Liste ermöglicht.
+    Über `load_entries()` werden die Einträge des Planers aus der JSON-Datei geladen.
+    Die Funktion `save_entries(startzeit, endzeit)` erweitert die bestehende Liste um das hinzugefügte Element (von, bis). Die Einträge werden, sortiert nach "von", an die JSON-Datei übergeben.
+    Über `show_planner_entries()` wird auf die Funktion `load_entries()` zugegriffen und die Visualisierung der Liste ermöglicht.
 
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 start_stop.py
-    Hinzufügen einer toggle funktion für die Start-Stop aktivität
+    Hinzufügen einer Toggle-Funktion für die Start-Stopp-Aktivität.
 
-        falls is_recording == true -> aktives tracking
-        falls is_recording == false -> kein aktives tracking
+        Falls `is_recording == true` -> aktives Tracking.
+        Falls `is_recording == false` -> kein aktives Tracking.
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

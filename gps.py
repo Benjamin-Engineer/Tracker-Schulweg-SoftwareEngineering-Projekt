@@ -3,7 +3,7 @@ import pynmea2
 from dateifunktionen import gps_json_write
 from datetime import datetime
 
-starttime = str(datetime.now()) # Startzeit des Programmes
+starttime = str(datetime.now()) # Startzeit des Programms
 
 gps = serial.Serial('/dev/ttyAMA0', baudrate=9600, timeout=1)
 

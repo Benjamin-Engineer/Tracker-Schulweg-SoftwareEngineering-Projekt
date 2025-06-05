@@ -1,9 +1,261 @@
 import json
 import os # path operations & folder creation
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 
-def gps_json_write(coordinates_str, timestamp_str,  folder=".", filename=str(datetime.now()).replace(":", "-").replace(".", "-") + ".json"):
+
+
+
+# STANDARDWERTE:
+
+STANDORTE_FOLDER = "Standorte"  # Standardordner für Standortdateien
+# Ordner wird von der gleichen Stelle erstellt, wo sich die ausgeführte Datei befindet
+
+POSITION_CULLING = 0.0001 # Standardwert für die minimale Distanz zur letzten Position, um einen neuen Eintrag zu erstellen
+# 0.00001 = 0.11112m <-> 0.0001 = 1.1112m <-> 0.001 = 11.112m (laut https://wiki.openstreetmap.org/wiki/Precision_of_coordinates)
+
+STANDORT_DEFINITION = 15 # Standardwert für die Dauer (in Minuten), für die keine signifikante Bewegung festgestellt wird, bis die Position als Standort erkannt wird
+# Standardwert 15, da 15 Minutes im Pflichtenheft steht (kann zu Testzwecken reduziert werden)
+
+
+
+
+
+def erstelle_standortdatei(coordinates_str, timestamp_str, folder=STANDORTE_FOLDER):
+    """
+    Erstellt eine Textdatei für einen Standort, wenn diese noch nicht existiert.
+    Die Datei wird nach den Koordinaten benannt und enthält die Koordinaten und den Zeitstempel.
+
+    Args:
+        coordinates_str (str): Die Koordinaten als String (z.B. "50.742708 7.066977").
+        timestamp_str (str): Der Zeitstempel als String (z.B. "2023-10-27 15:30:00.123456").
+        folder (str, optional): Der Ordner, in dem die Datei gespeichert werden soll.
+                                Standardmäßig "Standorte".
+    """
+    # Ersetze ungültige Zeichen für Dateinamen, falls Koordinaten Sonderzeichen enthalten (z.B. bei "NO SIGNAL")
+    # Windows verbietet < > : " / \ | ? *
+    # Linux verbietet / und Null-Byte. os.path.join kümmert sich um /
+    safe_filename_part = coordinates_str.replace(":", "-").replace("/", "-").replace("\\", "-")
+    safe_filename_part = "".join(c for c in safe_filename_part if c not in '<>"|?*')
+
+    filename = f"{safe_filename_part}.txt"
+    full_path_to_file = os.path.join(folder, filename)
+
+    try:
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+            print(f"Info: Ordner '{folder}' für Standortdateien wurde erstellt.")
+        
+        if os.path.exists(full_path_to_file):
+            print(f"Info: Standortdatei '{full_path_to_file}' existiert bereits und wird nicht überschrieben.")
+            return
+
+        with open(full_path_to_file, 'w', encoding='utf-8') as f:
+            f.write(f"{coordinates_str}\n")
+            f.write(f"{timestamp_str}\n")
+        print(f"Info: Standortdatei '{full_path_to_file}' wurde erfolgreich erstellt.")
+    except OSError as e:
+        print(f"Fehler: Konnte Standortdatei '{full_path_to_file}' nicht erstellen/schreiben: {e}")
+
+
+
+
+
+def benenne_standort(new_name_str, filename_str, folder=STANDORTE_FOLDER):
+    """
+    Ändert die erste Zeile (den Namen/Koordinaten) einer bestehenden Standort-Textdatei.
+
+    Args:
+        new_name_str (str): Der neue Name/Wert für die erste Zeile.
+        filename_str (str): Der Dateiname der zu ändernden .txt-Datei (z.B. "50.123456 7.123456.txt").
+        folder (str, optional): Der Ordner, in dem sich die Datei befindet.
+                                Standardmäßig "Standorte".
+    """
+    full_path_to_file = os.path.join(folder, filename_str)
+
+    if not os.path.exists(full_path_to_file):
+        print(f"Fehler: Datei '{full_path_to_file}' nicht gefunden. Umbenennung nicht möglich.")
+        return
+
+    try:
+        with open(full_path_to_file, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+        
+        if not lines:
+            # Wenn die Datei leer ist, erstellen wir die erste Zeile und fügen ggf. eine Leerzeile für den Zeitstempel hinzu
+            lines.append(new_name_str + '\n')
+            if len(lines) < 2: # Sicherstellen, dass es Platz für einen Zeitstempel gibt
+                 lines.append('\n') 
+            print(f"Warnung: Datei '{full_path_to_file}' war leer. Erste Zeile wurde zu '{new_name_str}' gesetzt.")
+        else:
+            # Ersetze die erste Zeile, behalte den Zeilenumbruch bei, falls vorhanden
+            original_first_line_had_newline = lines[0].endswith('\n')
+            lines[0] = new_name_str + ('\n' if original_first_line_had_newline else '')
+            if len(lines) < 2: # Falls die Datei nur eine Zeile hatte, füge eine Leerzeile für den Zeitstempel hinzu
+                lines.append('\n')
+
+
+        with open(full_path_to_file, 'w', encoding='utf-8') as f:
+            f.writelines(lines)
+        print(f"Info: Erste Zeile von '{full_path_to_file}' wurde zu '{new_name_str}' geändert.")
+
+    except IOError as e:
+        print(f"Fehler: Konnte Datei '{full_path_to_file}' nicht lesen/schreiben: {e}")
+    except Exception as e_general:
+        print(f"Ein unerwarteter Fehler ist beim Umbenennen des Standorts in '{full_path_to_file}' aufgetreten: {e_general}")
+
+
+
+
+
+def get_standorte(folder=STANDORTE_FOLDER):
+    """
+    Gibt eine Liste aller .txt-Dateien (Standorte) im angegebenen Ordner zurück.
+    Jedes Element der Liste ist ein Tupel: (Location, CustomName, Timestamp).
+    - Location: Name der .txt-Datei ohne Endung.
+    - CustomName: Inhalt der ersten Zeile der .txt-Datei. Ist None, wenn die erste Zeile identisch zur Location ist oder fehlt.
+    - Timestamp: Inhalt der zweiten Zeile der .txt-Datei.
+
+    Die Liste ist sortiert:
+    1. Standorte ohne CustomName (None), sortiert nach Timestamp (neueste zuerst).
+    2. Standorte mit CustomName, sortiert alphabetisch nach CustomName.
+    """
+    standort_daten = []
+
+    if not os.path.exists(folder):
+        print(f"Warnung: Ordner '{folder}' für Standorte nicht gefunden.")
+        return []
+
+    for filename in os.listdir(folder):
+        if filename.endswith(".txt"):
+            filepath = os.path.join(folder, filename)
+            location_from_filename = filename[:-4]  # Dateiname ohne .txt
+            
+            custom_name = None  # Standardwert
+            timestamp_str = ""    # Standardwert
+
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    lines = [line.strip() for line in f.readlines()]
+                
+                if len(lines) >= 1:
+                    first_line_content = lines[0]
+                    if first_line_content == location_from_filename:
+                        custom_name = None
+                    else:
+                        custom_name = first_line_content
+                # Wenn lines < 1, bleibt custom_name None
+
+                if len(lines) >= 2:
+                    timestamp_str = lines[1]
+                # Wenn lines < 2, bleibt timestamp_str ""
+                
+                standort_daten.append({
+                    "location": location_from_filename,
+                    "custom_name": custom_name,
+                    "timestamp": timestamp_str,
+                    "original_filename": filename # für Debugging-Zwecke bei Zeitstempel-Parsing
+                })
+
+            except IOError as e:
+                print(f"Fehler beim Lesen der Datei '{filepath}': {e}")
+            except Exception as e_general:
+                print(f"Unerwarteter Fehler beim Verarbeiten der Datei '{filepath}': {e_general}")
+
+    unnamed_standorte = []
+    named_standorte = []
+
+    for item in standort_daten:
+        if item["custom_name"] == None:
+            unnamed_standorte.append(item)
+        else:
+            named_standorte.append(item)
+
+    # Sortierfunktion für unbenannte Standorte (nach Zeitstempel, neueste zuerst)
+    def get_sort_key_unnamed(item):
+        ts_str = item["timestamp"]
+        if not ts_str: # Leerer Zeitstempel wird als ältester behandelt
+            return datetime.min.replace(tzinfo=timezone.utc)
+        try:
+            return _parse_string_to_utc_datetime(ts_str)
+        except ValueError:
+            # print(f"Warnung: Zeitstempel '{ts_str}' für '{item['original_filename']}' konnte nicht geparst werden. Wird als ältester sortiert.")
+            return datetime.min.replace(tzinfo=timezone.utc) # Bei Fehler als ältester
+
+    unnamed_standorte.sort(key=get_sort_key_unnamed, reverse=True)
+
+    # Sortierfunktion für benannte Standorte (alphabetisch nach Custom Name)
+    named_standorte.sort(key=lambda item: item["custom_name"].lower())
+
+    # Erstelle die finale Ergebnisliste im gewünschten Tupel-Format
+    ergebnisliste = []
+    for item in unnamed_standorte:
+        ergebnisliste.append((item["location"], item["custom_name"], item["timestamp"]))
+    
+    for item in named_standorte:
+        ergebnisliste.append((item["location"], item["custom_name"], item["timestamp"]))
+        
+    return ergebnisliste
+
+
+
+
+
+def _parse_string_to_utc_datetime(ts_str):
+    """
+    Parst verschiedene Zeitstempel-Stringformate in zeitzonenbewusste datetime-Objekte (UTC).
+    Behandelt Formate wie:
+    - "JJJJ-MM-TT HH:MM:SS.ffffff" (von str(datetime.now()) oder ähnlichen Formaten ohne explizite Zeitzone)
+    - "JJJJ-MM-TT HH:MM:SS+HH:MM" (ISO mit Zeitzone)
+    - "JJJJ-MM-TT HH:MM:SS+HH.MM" (Variante aus Testdaten, wird konvertiert)
+    """
+    original_ts_str = ts_str # Für Fehlermeldungen
+
+    # Übliche Vorverarbeitung
+    if 'T' not in ts_str and ' ' in ts_str:
+        ts_str = ts_str.replace(' ', 'T', 1)
+    if len(ts_str) > 6 and ts_str[-3] == '.' and (ts_str[-6] == '+' or ts_str[-6] == '-'): # Korrigiert +HH.MM zu +HH:MM
+        ts_str = ts_str[:-3] + ":" + ts_str[-2:]
+
+    dt_obj = None
+    try:
+        dt_obj = datetime.fromisoformat(ts_str)
+    except ValueError:
+        formats_to_try = ["%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S"]
+        for fmt in formats_to_try:
+            try:
+                dt_obj = datetime.strptime(ts_str, fmt)
+                break 
+            except ValueError:
+                continue
+        if dt_obj is None:
+            raise ValueError(f"Zeitstempel-String '{original_ts_str}' konnte mit keinem bekannten Format geparst werden.")
+
+    if dt_obj.tzinfo is None or dt_obj.tzinfo.utcoffset(dt_obj) is None:
+        # Macht das Objekt zeitzonenbewusst mit der lokalen Zeitzone und konvertiert dann zu UTC
+        dt_obj = dt_obj.astimezone().astimezone(timezone.utc)
+    else:
+        # Wenn bereits zeitzonenbewusst, nur zu UTC konvertieren
+        dt_obj = dt_obj.astimezone(timezone.utc)
+    return dt_obj
+
+def parse_and_format_to_short_timestamp_string(ts_str):
+    """
+    Parst verschiedene Zeitstempel-Stringformate und gibt einen formatierten String "JJJJ-MM-TT HH:MM:SS" zurück.
+    Die Zeit wird vor der Formatierung in UTC konvertiert.
+    """
+    try:
+        datetime_obj_utc = _parse_string_to_utc_datetime(ts_str)
+        return datetime_obj_utc.strftime('%Y-%m-%d %H:%M:%S')
+    except ValueError as e:
+        print(f"Warnung: Konnte Zeitstempel '{ts_str}' nicht für Kurzformatierung parsen: {e}")
+        # Entscheide über Fallback-Verhalten: erneut auslösen, Original zurückgeben oder Fehlerstring zurückgeben
+        # Vorerst wird erneut ausgelöst, um den Aufrufer auf das Parsing-Problem aufmerksam zu machen.
+        raise
+
+
+
+def gps_json_write(coordinates_str, timestamp_str,  folder=".", filename=str(datetime.now()).replace(":", "-").replace(".", "-") + ".json", culling_accuracy=POSITION_CULLING, standorterkennungszeit=STANDORT_DEFINITION):
     """
     Fügt einen neuen Eintrag (Koordinaten und Zeit) zu einer JSON-Datei hinzu.
     Wenn die Datei nicht existiert, wird eine neue erstellt.
@@ -16,7 +268,29 @@ def gps_json_write(coordinates_str, timestamp_str,  folder=".", filename=str(dat
         timestamp_str (str): Der Zeitstempel als String. (z.B.2025-05-21 20:04:28+00.00)
         filename (str): Der Name der JSON-Datei (z.B. "23-22-21.json").
         folder (str, optional): Der Ordner, in dem die Datei gespeichert werden soll. Standardmäßig der aktuelle Ordner (".").
+        culling_accuracy (float, optional): Minimale Distanz (in Grad) zur letzten Position, um einen neuen Eintrag zu erstellen.
+        standorterkennungszeit (int, optional): Dauer (in Minuten) ohne signifikante Bewegung, bis ein Standort erkannt wird.
     """
+
+    original_coordinates_str = coordinates_str  # Keep for messages
+
+    final_coord_str_to_write = original_coordinates_str  # Default if not parsable
+    current_f_lat, current_f_lon = None, None
+    is_current_coord_valid_for_comparison = False
+
+    # Attempt to parse original_coordinates_str and format to 6 decimal places. (6 Nachkommastellen sind auf 0.11112m genau, laut https://wiki.openstreetmap.org/wiki/Precision_of_coordinates)
+    # Also, get float versions of these 6-decimal-place values for comparison.
+    try:
+        raw_lat_str, raw_lon_str = original_coordinates_str.split()
+        raw_lat = float(raw_lat_str)
+        raw_lon = float(raw_lon_str)
+
+        final_coord_str_to_write = f"{raw_lat:.6f} {raw_lon:.6f}"
+        current_f_lat = float(f"{raw_lat:.6f}") # Float from 6-decimal representation
+        current_f_lon = float(f"{raw_lon:.6f}") # Float from 6-decimal representation
+        is_current_coord_valid_for_comparison = True
+    except ValueError:
+        print (f"Info: Eingabe '{original_coordinates_str}' enthält keine validen Koordinaten und wird unaufbereitet übernommen.")
 
     # Ensure the target folder exists, create it if it doesn't
     if not os.path.exists(folder):
@@ -31,7 +305,7 @@ def gps_json_write(coordinates_str, timestamp_str,  folder=".", filename=str(dat
     existing_data = []
 
     try:
-        with open(full_path, 'r') as f:
+        with open(full_path, 'r', encoding='utf-8') as f:
             loaded_data = json.load(f)
             if isinstance(loaded_data, list):
                 existing_data = loaded_data
@@ -41,15 +315,68 @@ def gps_json_write(coordinates_str, timestamp_str,  folder=".", filename=str(dat
         print(f"Info: Datei {full_path} nicht gefunden. Eine neue Datei wird erstellt.")
     except json.JSONDecodeError:
         print(f"Warnung: Datei {full_path} enthielt ungültiges JSON oder war leer. Eine neue Liste wird erstellt.")
+    except Exception as e:
+        print(f"Fehler beim Lesen der JSON-Datei {full_path}: {e}")
+
+    # Check for deviation if current coordinates are valid for comparison and there's previous data
+    if is_current_coord_valid_for_comparison and existing_data:
+        last_entry = existing_data[-1]
+        last_coords_str_from_file = last_entry.get("coord")
+
+        if last_coords_str_from_file:
+            try:
+                # Previous coordinates from file (should already be 6dp if valid)
+                last_lat_str_ff, last_lon_str_ff = last_coords_str_from_file.split() # ff = from file
+                last_f_lat = float(last_lat_str_ff)
+                last_f_lon = float(last_lon_str_ff)
+
+                if abs(current_f_lat - last_f_lat) < culling_accuracy and abs(current_f_lon - last_f_lon) < culling_accuracy:
+                    print(f"Info: Neuer Eintrag (Original: '{original_coordinates_str}', Formatiert: '{final_coord_str_to_write}') weicht minimal von letztem Eintrag ('{last_coords_str_from_file}') ab. Eintrag wird übersprungen.")
+                    return # Do not add the new entry
+            except ValueError:
+                # Last coordinate in file was not a valid parsable pair (e.g., "NO SIGNAL").
+                # Proceed to add the new one if it's valid.
+                pass
+
+    # Prüfe auf signifikante Zeitlücke zum vorherigen Eintrag, um eine Standortdatei zu erstellen
+    if existing_data: # Sicherstellen, dass es einen vorherigen Eintrag zum Vergleichen gibt
+        last_written_entry = existing_data[-1]
+        last_timestamp_str_from_file = last_written_entry.get("time")
+        current_timestamp_to_evaluate = timestamp_str # Zeitstempel des aktuellen, potenziellen Eintrags
+
+        if last_timestamp_str_from_file and current_timestamp_to_evaluate:
+            try:
+                last_dt_utc = _parse_string_to_utc_datetime(last_timestamp_str_from_file)
+                current_dt_utc = _parse_string_to_utc_datetime(current_timestamp_to_evaluate)
+                
+                time_difference = current_dt_utc - last_dt_utc
+
+                if time_difference >= timedelta(minutes=standorterkennungszeit):
+                    coords_for_standort = last_written_entry.get("coord")
+                    if coords_for_standort and coords_for_standort != "NO SIGNAL": # Nur Standortdatei erstellen, wenn Koordinate valide ist
+                        print(f"Info: Zeitdifferenz von {time_difference} zum letzten Eintrag ({last_timestamp_str_from_file}) erkannt. Erstelle Standortdatei für vorherige Koordinate '{coords_for_standort}' mit Zeitstempel des neuen Eintrags '{current_timestamp_to_evaluate}'.")
+                        erstelle_standortdatei(coordinates_str=coords_for_standort,
+                                               timestamp_str=current_timestamp_to_evaluate)
+                    elif coords_for_standort == "NO SIGNAL":
+                        print(f"Info: Zeitdifferenz von {time_difference} erkannt, aber vorherige Koordinate war 'NO SIGNAL'. Keine Standortdatei erstellt.")
+                    else:
+                        print(f"Warnung: Konnte keine Koordinaten im vorherigen Eintrag für Standortdatei finden.")
+
+            except ValueError as e_parse:
+                print(f"Warnung: Zeitstempel '{last_timestamp_str_from_file}' oder '{current_timestamp_to_evaluate}' konnte für Zeitdifferenzprüfung nicht geparst werden: {e_parse}")
+            except Exception as e_general: 
+                print(f"Ein unerwarteter Fehler ist bei der Zeitdifferenzprüfung aufgetreten: {e_general}")
 
     new_entry = {
-        "coord": coordinates_str,
+        "coord": final_coord_str_to_write,
         "time": timestamp_str
     }
     existing_data.append(new_entry)
     try:
-        with open(full_path, 'w') as f:
+        with open(full_path, 'w', encoding='utf-8') as f:
             json.dump(existing_data, f, indent=2)
         print(f"Eintrag erfolgreich zu {full_path} hinzugefügt.")
     except IOError as e:
         print(f"Fehler beim Schreiben in Datei {full_path}: {e}")
+    except Exception as e_general:
+        print(f"Ein unerwarteter Fehler ist beim Schreiben der JSON-Datei {full_path} aufgetreten: {e_general}")
