@@ -1,7 +1,7 @@
 import datetime
-from dateifunktionen import gps_json_write #Custom Import. Kann kaputtgehen wenn die Routendatei umbenannt wird
+import dateifunktionen # Benutzerdefinierter Import. Kann fehlschlagen, wenn dateifunktionen.py umbenannt wird.
 
-
+# from dateifunktionen import gps_json_write, get_standorte # Custom Import
 
 # Welche Testdatendatei soll verwendet werden?
 listendatei = "testdaten_extrapoliert.txt"
@@ -22,15 +22,15 @@ def load_data_from_file(filepath):
     new_data_list = []
     try:
         with open(filepath, 'r') as f:
-            # Read all lines, strip whitespace, and filter out empty lines
+            # Alle Zeilen lesen, Leerzeichen entfernen und leere Zeilen herausfiltern
             lines = [line.strip() for line in f if line.strip()]
 
-        # Process lines in pairs: testdaten.txt has date, then coords.
-        # The target 'daten' list structure is: coords, then timestamp.
+        # Zeilen paarweise verarbeiten: testdaten.txt enthält Datum, dann Koordinaten.
+        # Die Zielstruktur der 'daten'-Liste ist: Koordinaten, dann Zeitstempel.
         idx = 0
         while idx + 1 < len(lines):
-            date_str = lines[idx]      # e.g., "2025-05-21 20:04:28+00.00"
-            coords_str = lines[idx+1]  # e.g., "50.74271683333333 7.0670345"
+            date_str = lines[idx]      # z.B. "2025-05-21 20:04:28+00.00"
+            coords_str = lines[idx+1]  # z.B. "50.74271683333333 7.0670345"
 
             new_data_list.append(coords_str)
             new_data_list.append(date_str)
@@ -38,16 +38,16 @@ def load_data_from_file(filepath):
             idx += 2
     except FileNotFoundError:
         print(f"Warning: File '{filepath}' not found. 'daten' will be empty.")
+        # print(f"Warnung: Datei '{filepath}' nicht gefunden. 'daten' wird leer sein.") # Alternative deutsche Meldung
     except Exception as e:
         print(f"An error occurred while reading '{filepath}': {e}. 'daten' will be empty.")
+        # print(f"Beim Lesen von '{filepath}' ist ein Fehler aufgetreten: {e}. 'daten' wird leer sein.") # Alternative deutsche Meldung
     return new_data_list
-
-
 
 daten = load_data_from_file(listendatei) # testdaten.txt muss sich im gleichen Ordner wie gps-test.py befinden
 
 def gps_test(data_list):
-    # Using enumerate for a cleaner loop
+    # Verwendung von enumerate für eine sauberere Schleife
     for i, item in enumerate(data_list):
         print(i, item)
 
@@ -56,9 +56,6 @@ if daten:
     gps_test(daten)
 else:
     print(listendatei, "enthält keine Daten.")
-
-
-
 
 # Ordner der Routendatei
 # Wenn der Ordner nicht existiert, wird er erstellt
@@ -72,9 +69,13 @@ if daten:
         coords_str = daten[i]
         time_str = daten[i+1]
 
-# BEISPIELE (Hasttag entfernen zum ausprobieren):
-        gps_json_write(coords_str, time_str, parent_folder) # Erzeugt eine neue Datei mit aktueller Zeit als Namen im Ordner parent_folder.
-        #gps_json_write(coords_str, time_str) # Erzeugt eine neue Datei im gleichen Ordner wie dieses Programm
-        #gps_json_write (coords, time_str, parent_folder, "Name") # Erzeugt eine neue Datei Name.json in parent_folder
-        #gps_json_write (coords, time_str, "Name") # Erzeugt eine neue Datei Name.json im gleichen Ordner
-        #gps_json_write (coords, time_str, "Beispielordner", "Name") # Erzeugt eine neue Datei Name.json im Ordner Beispielordner
+# BEISPIELE (Hashtag entfernen zum Ausprobieren):
+        dateifunktionen.gps_json_write(coords_str, time_str, parent_folder) # Erzeugt eine neue Datei mit aktueller Zeit als Namen im Ordner parent_folder.
+        #dateifunktionen.gps_json_write(coords_str, time_str) # Erzeugt eine neue Datei im gleichen Ordner wie dieses Programm
+        #dateifunktionen.gps_json_write (coords, time_str, parent_folder, "Name") # Erzeugt eine neue Datei Name.json in parent_folder
+        #dateifunktionen.gps_json_write (coords, time_str, "Name") # Erzeugt eine neue Datei Name.json im gleichen Ordner
+        #dateifunktionen.gps_json_write (coords, time_str, "Beispielordner", "Name") # Erzeugt eine neue Datei Name.json im Ordner Beispielordner
+
+# Standorte als Liste ausgeben (bereits nach Anforderungen des Pflichtenheftes sortiert, jeder Standorteintrag besteht aus Koordinatenstring, Name (falls unbenannt: "none") und Timestamp)
+print("STANDORTLISTE:")
+print(dateifunktionen.get_standorte())
