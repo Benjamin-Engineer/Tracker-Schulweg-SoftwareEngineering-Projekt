@@ -113,12 +113,11 @@ def get_standorte(folder=STANDORTE_FOLDER):
     Gibt eine Liste aller .txt-Dateien (Standorte) im angegebenen Ordner zurück.
     Jedes Element der Liste ist ein Tupel: (Location, CustomName, Timestamp).
     - Location: Name der .txt-Datei ohne Endung.
-    - CustomName: Inhalt der ersten Zeile der .txt-Datei. Ist "none", wenn
-                  die erste Zeile identisch zur Location ist oder fehlt.
+    - CustomName: Inhalt der ersten Zeile der .txt-Datei. Ist None, wenn die erste Zeile identisch zur Location ist oder fehlt.
     - Timestamp: Inhalt der zweiten Zeile der .txt-Datei.
 
     Die Liste ist sortiert:
-    1. Standorte ohne CustomName ("none"), sortiert nach Timestamp (neueste zuerst).
+    1. Standorte ohne CustomName (None), sortiert nach Timestamp (neueste zuerst).
     2. Standorte mit CustomName, sortiert alphabetisch nach CustomName.
     """
     standort_daten = []
@@ -132,7 +131,7 @@ def get_standorte(folder=STANDORTE_FOLDER):
             filepath = os.path.join(folder, filename)
             location_from_filename = filename[:-4]  # Dateiname ohne .txt
             
-            custom_name = "none"  # Standardwert
+            custom_name = None  # Standardwert
             timestamp_str = ""    # Standardwert
 
             try:
@@ -142,10 +141,10 @@ def get_standorte(folder=STANDORTE_FOLDER):
                 if len(lines) >= 1:
                     first_line_content = lines[0]
                     if first_line_content == location_from_filename:
-                        custom_name = "none"
+                        custom_name = None
                     else:
                         custom_name = first_line_content
-                # Wenn lines < 1, bleibt custom_name "none"
+                # Wenn lines < 1, bleibt custom_name None
 
                 if len(lines) >= 2:
                     timestamp_str = lines[1]
@@ -167,7 +166,7 @@ def get_standorte(folder=STANDORTE_FOLDER):
     named_standorte = []
 
     for item in standort_daten:
-        if item["custom_name"] == "none":
+        if item["custom_name"] == None:
             unnamed_standorte.append(item)
         else:
             named_standorte.append(item)
