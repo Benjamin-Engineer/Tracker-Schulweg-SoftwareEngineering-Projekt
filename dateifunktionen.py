@@ -11,7 +11,7 @@ from datetime import datetime, timedelta, timezone
 STANDORTE_FOLDER = "Standorte"  # Standardordner für Standortdateien
 # Ordner wird von der gleichen Stelle erstellt, wo sich die ausgeführte Datei befindet
 
-POSITION_CULLING = 0.0001 # Standardwert für die minimale Distanz zur letzten Position, um einen neuen Eintrag zu erstellen
+POSITION_CULLING = 0.0005 # Standardwert für die minimale Distanz zur letzten Position, um einen neuen Eintrag zu erstellen
 # 0.00001 = 0.11112m <-> 0.0001 = 1.1112m <-> 0.001 = 11.112m (laut https://wiki.openstreetmap.org/wiki/Precision_of_coordinates)
 
 STANDORT_DEFINITION = 15 # Standardwert für die Dauer (in Minuten), für die keine signifikante Bewegung festgestellt wird, bis die Position als Standort erkannt wird
@@ -174,7 +174,7 @@ def get_standorte(folder=STANDORTE_FOLDER, routendatei=None):
                     "location": location_from_filename,
                     "custom_name": custom_name,
                     "timestamp": timestamp_str,
-                    "original_filename": filename # für Debugging-Zwecke bei Zeitstempel-Parsing
+                    "original_filename": filename # Für Debugging-Zwecke bei Zeitstempel-Parsing
                 })
 
             except IOError as e:
@@ -204,12 +204,12 @@ def get_standorte(folder=STANDORTE_FOLDER, routendatei=None):
             print(f"Fehler beim Lesen der Routendatei '{routendatei}': {e}")
             return []
 
-        added_standort_filenames = set() # Verhindert Duplikate, falls mehrere Routenpunkte auf denselben Standort zeigen
+        added_standort_filenames = set() # Verhindert Duplikate, falls mehrere Routenpunkte auf denselben Standort zeigen.
         DISTANCE_THRESHOLD = POSITION_CULLING
 
         for route_entry in route_entries:
             route_coord_str = route_entry.get("coord")
-            route_time_str = route_entry.get("time", "N/A") # Zeitstempel aus der Routendatei für die Meldung
+            route_time_str = route_entry.get("time", "N/A") # Zeitstempel aus der Routendatei für die Meldung.
 
             if not route_coord_str:
                 continue # Routen-Eintrag ohne Koordinaten überspringen
@@ -221,12 +221,12 @@ def get_standorte(folder=STANDORTE_FOLDER, routendatei=None):
 
             matched_standort_in_folder = None
 
-            # 1. Exakte Übereinstimmung prüfen
+            # 1. Exakte Übereinstimmung prüfen.
             for s_data in standort_daten_from_folder:
                 if s_data["location"] == route_coord_str:
                     matched_standort_in_folder = s_data
                     break
-            
+
             # 2. Wenn keine exakte Übereinstimmung, nach nächstgelegenem innerhalb der Toleranz suchen
             if not matched_standort_in_folder:
                 closest_s_data_within_threshold = None
@@ -237,17 +237,17 @@ def get_standorte(folder=STANDORTE_FOLDER, routendatei=None):
                     s_lat, s_lon = _parse_coord_string_to_floats(s_loc_str)
                     if s_lat is None or s_lon is None:
                         continue 
-
+            
                     lat_diff = abs(route_lat - s_lat)
                     lon_diff = abs(route_lon - s_lon)
-
+            
                     if lat_diff < DISTANCE_THRESHOLD and lon_diff < DISTANCE_THRESHOLD:
                         current_diff_metric = lat_diff**2 + lon_diff**2 
                         if current_diff_metric < min_diff_metric:
                             min_diff_metric = current_diff_metric
                             closest_s_data_within_threshold = s_data
                 matched_standort_in_folder = closest_s_data_within_threshold
-            
+
             if matched_standort_in_folder:
                 if matched_standort_in_folder["original_filename"] not in added_standort_filenames:
                     standort_daten_to_process.append(matched_standort_in_folder)
@@ -266,7 +266,7 @@ def get_standorte(folder=STANDORTE_FOLDER, routendatei=None):
     # Sortierfunktion für unbenannte Standorte (nach Zeitstempel, neueste zuerst)
     def get_sort_key_unnamed(item):
         ts_str = item["timestamp"]
-        if not ts_str: # Leerer Zeitstempel wird als ältester behandelt
+        if not ts_str: # Leerer Zeitstempel wird als ältester behandelt.
             return datetime.min.replace(tzinfo=timezone.utc)
         try:
             return _parse_string_to_utc_datetime(ts_str)
@@ -301,10 +301,10 @@ def _parse_string_to_utc_datetime(ts_str):
     - "JJJJ-MM-TT HH:MM:SS+HH:MM" (ISO mit Zeitzone)
     - "JJJJ-MM-TT HH:MM:SS+HH.MM" (Variante aus Testdaten, wird konvertiert)
     """
-    original_ts_str = ts_str # Für Fehlermeldungen
+    original_ts_str = ts_str # Für Fehlermeldungen.
 
     # Übliche Vorverarbeitung
-    if 'T' not in ts_str and ' ' in ts_str:
+    if 'T' not in ts_str and ' ' in ts_str: # Stellt sicher, dass 'T' als Trennzeichen für ISO-Format verwendet wird.
         ts_str = ts_str.replace(' ', 'T', 1)
     if len(ts_str) > 6 and ts_str[-3] == '.' and (ts_str[-6] == '+' or ts_str[-6] == '-'): # Korrigiert +HH.MM zu +HH:MM
         ts_str = ts_str[:-3] + ":" + ts_str[-2:]
@@ -364,34 +364,34 @@ def gps_json_write(coordinates_str, timestamp_str,  folder=".", filename=str(dat
         standorterkennungszeit (int, optional): Dauer (in Minuten) ohne signifikante Bewegung, bis ein Standort erkannt wird.
     """
 
-    original_coordinates_str = coordinates_str  # Keep for messages
+    original_coordinates_str = coordinates_str  # Behält die ursprünglichen Koordinaten für Nachrichten bei.
 
-    final_coord_str_to_write = original_coordinates_str  # Default if not parsable
+    final_coord_str_to_write = original_coordinates_str  # Standardwert, falls nicht parsenbar.
     current_f_lat, current_f_lon = None, None
     is_current_coord_valid_for_comparison = False
 
-    # Attempt to parse original_coordinates_str and format to 6 decimal places. (6 Nachkommastellen sind auf 0.11112m genau, laut https://wiki.openstreetmap.org/wiki/Precision_of_coordinates)
-    # Also, get float versions of these 6-decimal-place values for comparison.
+    # Versucht, original_coordinates_str zu parsen und auf 6 Dezimalstellen zu formatieren. (6 Nachkommastellen sind auf 0.11112m genau, laut https://wiki.openstreetmap.org/wiki/Precision_of_coordinates)
+    # Erhält auch Float-Versionen dieser Werte mit 6 Dezimalstellen für den Vergleich.
     try:
         raw_lat_str, raw_lon_str = original_coordinates_str.split()
         raw_lat = float(raw_lat_str)
         raw_lon = float(raw_lon_str)
 
         final_coord_str_to_write = f"{raw_lat:.6f} {raw_lon:.6f}"
-        current_f_lat = float(f"{raw_lat:.6f}") # Float from 6-decimal representation
-        current_f_lon = float(f"{raw_lon:.6f}") # Float from 6-decimal representation
+        current_f_lat = float(f"{raw_lat:.6f}") # Float aus der 6-Dezimalstellen-Darstellung.
+        current_f_lon = float(f"{raw_lon:.6f}") # Float aus der 6-Dezimalstellen-Darstellung.
         is_current_coord_valid_for_comparison = True
     except ValueError:
         print (f"Info: Eingabe '{original_coordinates_str}' enthält keine validen Koordinaten und wird unaufbereitet übernommen.")
 
-    # Ensure the target folder exists, create it if it doesn't
+    # Stellt sicher, dass der Zielordner existiert, erstellt ihn, falls nicht.
     if not os.path.exists(folder):
         try:
             os.makedirs(folder)
             print(f"Info: Ordner '{folder}' wurde erstellt.")
         except OSError as e:
             print(f"Fehler: Konnte Ordner '{folder}' nicht erstellen: {e}")
-            return # Exit if folder creation fails
+            return # Beenden, wenn die Ordnererstellung fehlschlägt.
 
     full_path = os.path.join(folder, filename)
     existing_data = []
@@ -410,24 +410,24 @@ def gps_json_write(coordinates_str, timestamp_str,  folder=".", filename=str(dat
     except Exception as e:
         print(f"Fehler beim Lesen der JSON-Datei {full_path}: {e}")
 
-    # Check for deviation if current coordinates are valid for comparison and there's previous data
+    # Prüft auf Abweichung, wenn aktuelle Koordinaten für den Vergleich gültig sind und vorherige Daten vorhanden sind.
     if is_current_coord_valid_for_comparison and existing_data:
         last_entry = existing_data[-1]
         last_coords_str_from_file = last_entry.get("coord")
 
         if last_coords_str_from_file:
             try:
-                # Previous coordinates from file (should already be 6dp if valid)
-                last_lat_str_ff, last_lon_str_ff = last_coords_str_from_file.split() # ff = from file
+                # Vorherige Koordinaten aus der Datei (sollten bereits 6 Dezimalstellen haben, wenn gültig).
+                last_lat_str_ff, last_lon_str_ff = last_coords_str_from_file.split() # ff = from file / aus Datei.
                 last_f_lat = float(last_lat_str_ff)
                 last_f_lon = float(last_lon_str_ff)
 
                 if abs(current_f_lat - last_f_lat) < culling_accuracy and abs(current_f_lon - last_f_lon) < culling_accuracy:
                     print(f"Info: Neuer Eintrag (Original: '{original_coordinates_str}', Formatiert: '{final_coord_str_to_write}') weicht minimal von letztem Eintrag ('{last_coords_str_from_file}') ab. Eintrag wird übersprungen.")
-                    return # Do not add the new entry
+                    return # Fügt den neuen Eintrag nicht hinzu.
             except ValueError:
-                # Last coordinate in file was not a valid parsable pair (e.g., "NO SIGNAL").
-                # Proceed to add the new one if it's valid.
+                # Die letzte Koordinate in der Datei war kein gültiges, parsenbares Paar (z.B. "NO SIGNAL").
+                # Fährt fort, die neue hinzuzufügen, wenn sie gültig ist.
                 pass
 
     # Prüfe auf signifikante Zeitlücke zum vorherigen Eintrag, um eine Standortdatei zu erstellen
