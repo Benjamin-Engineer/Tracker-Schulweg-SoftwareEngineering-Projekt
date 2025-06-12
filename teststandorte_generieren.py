@@ -3,7 +3,7 @@ import os
 STANDORTE_FOLDER = "Standorte"
 
 # Daten für die zu erstellenden Standortdateien
-# Format: (Dateiname, [Zeile1, Zeile2, ...])
+# Format: (Dateiname, [Zeile1, Zeile2, ...]).
 standort_dateien_daten = [
     (
         "50.000000 7.000000.txt",
@@ -38,6 +38,13 @@ standort_dateien_daten = [
         [
             "Zuhause",
             "2023-10-24 18:00:00.000000"
+        ]
+    ),
+    (
+        "50.741705 7.065974.txt",
+        [
+            "Bushaltestelle",
+            "2025-05-21 20:23:36+00.00"
         ]
     )
 ]

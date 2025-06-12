@@ -32,6 +32,6 @@ def tracker():
         
     try:
         coord = lat + " " + lon
-        gps_json_write(coord, systime, date, starttime) # Koordinaten, Zeit, Ordner, Dateiname
+        gps_json_write(coord, systime, date, starttime) # Parameter: Koordinaten, Zeit, Ordner, Dateiname
     except:
-        gps_json_write("NO SIGNAL", systime, "Error Log", starttime) # Meldung, Zeit, Ordner, Dateiname
+        gps_json_write("NO SIGNAL", systime, "Error Log", starttime) # Parameter: Meldung, Zeit, Ordner, Dateiname

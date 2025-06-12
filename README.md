@@ -24,13 +24,18 @@ dateifunktionen.py
         Standardparameter:
         "Ordner" : "Standorte"-Ordner im aktuellen Dateipfad
 
-    get_standorte("Optional:Ordner") 
+    get_standorte("Optional:Ordner", "Optional:Dateiname") 
         Gibt eine Liste aller Standorte im Standardordner (oder, falls angegeben, im ausgewählten Ordner) zurück.
+        Wenn eine Routendatei angegeben wird, werden nur Standorte ausgegeben, welche in der Route vorkommen (die Dateien dieser Standorte müssen im angegebenen Ordner liegen).
         Die Standorte in der Liste werden automatisch gemäß den Anforderungen des Pflichtenhefts sortiert:
         Zuerst alle unbenannten Standorte in chronologischer Reihenfolge, danach alle benannten Standorte in alphabetischer Reihenfolge.
         Die Einträge der Liste haben jeweils das Format (Koordinaten, Name, Zeitstempel), wobei der Eintrag "Name" mit "None" gekennzeichnet ist, wenn der Standort noch nicht benannt wurde (Rot auf der Karte anzeigen).
+        Beispiel:
+        get_standorte() gibt alle Standorte im Standardordner ("Standorte") zurück.
+        get_standorte(None, "2025-06-12\2025-06-12 15-19-38-209885.json") gibt alle Standorte aus, welche in der Route vorkommen und im Standardordner ("Standorte") gespeichert sind.
         Standardparameter:
-        "Ordner" : "Standorte"-Ordner im aktuellen Dateipfad
+        "Ordner" : "Standorte"-Ordner im aktuellen Dateipfad - nur Standorte aus dem angegebenen Ordner werden berücksichtigt
+        "Dateiname" : Dateipfad einer Routendatei. Falls angegeben, werden nur Standorte (aus dem angegebenen Ordner) ausgegeben, die auch in der Route vorkommen
 
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------

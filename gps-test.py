@@ -1,12 +1,12 @@
 import datetime
 import dateifunktionen # Benutzerdefinierter Import. Kann fehlschlagen, wenn dateifunktionen.py umbenannt wird.
-
+import os # Für Pfadoperationen wie os.path.join und os.path.exists
+import teststandorte_generieren
 
 
 # Welche Testdatendatei soll verwendet werden?
 listendatei = "testdaten_extrapoliert.txt"
 #listendatei = "testdaten.txt"
-
 
 
 def load_data_from_file(filepath):
@@ -61,30 +61,66 @@ else:
     print(listendatei, "enthält keine Daten.")
 
 
+# Erstellt zum Testen Standortdateien, darunter auch eine bereits benannte Standortdatei, welche in der Testroute vorkommt
+teststandorte_generieren.erstelle_test_standortdateien()
 
-# Ordner der Routendatei
-# Wenn der Ordner nicht existiert, wird er erstellt
+# Definiert den Ordner für die Routen-JSON-Datei.
 parent_folder = str(datetime.date.today())
+
+# Definiert den Ziel-JSON-Dateinamen *einmal* vor der Haupt-Datenverarbeitungsschleife.
+# Dies stellt sicher, dass alle Einträge aus 'daten' in eine einzige, bekannte Datei für den Test gelangen.
+route_filename_for_test = str(datetime.datetime.now()).replace(":", "-").replace(".", "-") + ".json"
+full_route_filepath = os.path.join(parent_folder, route_filename_for_test)
+
 """
-Fügt alle Koordinaten-Paare aus der Liste 'daten' mit den zugehörigen Zeitstempeln (aus testdaten.txt generiert) zur Route in der Datei hinzu.
-Ist keine Datei angegeben oder existiert die angegeben Datei nicht, wird automatisch eine neue Datei mit aktueller Zeit als Namen erstellt.
+Dieser Abschnitt fügt alle Koordinaten-Paare aus der Liste 'daten' 
+mit den zugehörigen Zeitstempeln (aus der Testdatendatei generiert) 
+zu einer spezifischen Routendatei hinzu (definiert als full_route_filepath).
 """
 if daten:
+    print(f"\nINFO: Writing GPS data to route file: {full_route_filepath}")
     for i in range(0, len(daten), 2):
         coords_str = daten[i]
         time_str = daten[i+1]
 
-
-
 # BEISPIELE (Hashtag entfernen zum Ausprobieren):
-        dateifunktionen.gps_json_write(coords_str, time_str, parent_folder) # Erzeugt eine neue Datei mit aktueller Zeit als Namen im Ordner parent_folder.
+        # Der primäre Aufruf verwendet nun einen expliziten Dateinamen für den Test.
+        dateifunktionen.gps_json_write(coords_str, time_str, folder=parent_folder, filename=route_filename_for_test)
+        
         #dateifunktionen.gps_json_write(coords_str, time_str) # Erzeugt eine neue Datei im gleichen Ordner wie dieses Programm
         #dateifunktionen.gps_json_write (coords, time_str, parent_folder, "Name") # Erzeugt eine neue Datei Name.json in parent_folder
         #dateifunktionen.gps_json_write (coords, time_str, "Name") # Erzeugt eine neue Datei Name.json im gleichen Ordner
         #dateifunktionen.gps_json_write (coords, time_str, "Beispielordner", "Name") # Erzeugt eine neue Datei Name.json im Ordner Beispielordner
+else:
+    print(f"\nINFO: No data in '{listendatei}', so no route file will be generated at '{full_route_filepath}'.")
 
+
+def test_get_standorte_with_routefile(route_file_path_to_test):
+    """Testet dateifunktionen.get_standorte mit einer spezifischen Routendatei."""
+    print("\n--- get_standorte für spezifische Route: ---")
+    if not os.path.exists(route_file_path_to_test):
+        print(f"FEHLER: Routendatei '{route_file_path_to_test}' nicht gefunden. Test kann nicht durchgeführt werden.")
+        return
+
+    print(f"INFO: Using route file: {route_file_path_to_test} to filter Standorte.")
+    standorte_gefiltert = dateifunktionen.get_standorte(routendatei=route_file_path_to_test)
+
+
+    print("\nErgebnis von get_standorte (gefiltert nach Route):")
+    if standorte_gefiltert:
+        for standort_tuple in standorte_gefiltert: # Renamed to avoid conflict if 'standort' is a module
+            print(standort_tuple) # Umbenannt, um Konflikte zu vermeiden, falls 'standort' ein Modul ist.
+    else:
+        print("Keine Standorte gefunden oder passend zur Route.")
 
 
 # Standorte als Liste ausgeben (bereits nach Anforderungen des Pflichtenheftes sortiert, jeder Standorteintrag besteht aus Koordinatenstring, Name (falls unbenannt: "none") und Timestamp)
-print("STANDORTLISTE:")
+
+# Ruft die neue Testfunktion für get_standorte mit der generierten Routendatei auf.
+if daten: # Führt diesen Test nur aus, wenn Daten verarbeitet wurden und die Datei erstellt werden sollte.
+    test_get_standorte_with_routefile(full_route_filepath)
+else:
+    print(f"\nINFO: Skipping test_get_standorte_with_routefile as no data was processed to create {full_route_filepath}.")
+
+print("\nSTANDORTLISTE (alle Standorte aus dem Standardordner):")
 print(dateifunktionen.get_standorte())
