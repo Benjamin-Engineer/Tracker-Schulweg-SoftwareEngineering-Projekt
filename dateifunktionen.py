@@ -107,8 +107,24 @@ def benenne_standort(new_name_str, filename_str, folder=STANDORTE_FOLDER):
 
 
 
+def _parse_coord_string_to_floats(coord_str):
+    """
+    Parst einen Koordinaten-String ("lat lon") in zwei Float-Werte.
+    Gibt (lat, lon) oder (None, None) bei Fehler zurück.
+    """
+    try:
+        parts = coord_str.split()
+        if len(parts) == 2:
+            lat = float(parts[0])
+            lon = float(parts[1])
+            return lat, lon
+        return None, None
+    except ValueError:
+        return None, None
 
-def get_standorte(folder=STANDORTE_FOLDER):
+
+
+def get_standorte(folder=STANDORTE_FOLDER, routendatei=None):
     """
     Gibt eine Liste aller .txt-Dateien (Standorte) im angegebenen Ordner zurück.
     Jedes Element der Liste ist ein Tupel: (Location, CustomName, Timestamp).
@@ -119,8 +135,12 @@ def get_standorte(folder=STANDORTE_FOLDER):
     Die Liste ist sortiert:
     1. Standorte ohne CustomName (None), sortiert nach Timestamp (neueste zuerst).
     2. Standorte mit CustomName, sortiert alphabetisch nach CustomName.
+
+    Wenn 'routendatei' (Pfad zu einer JSON-Datei) angegeben ist, werden nur Standorte zurückgegeben,
+    deren Koordinaten in der Routendatei enthalten sind (exakt oder nächstgelegen innerhalb von POSITION_CULLING).
+    Für Routenpunkte, die keinen passenden Standort finden, wird eine Meldung ausgegeben.
     """
-    standort_daten = []
+    standort_daten_from_folder = []
 
     if not os.path.exists(folder):
         print(f"Warnung: Ordner '{folder}' für Standorte nicht gefunden.")
@@ -150,7 +170,7 @@ def get_standorte(folder=STANDORTE_FOLDER):
                     timestamp_str = lines[1]
                 # Wenn lines < 2, bleibt timestamp_str ""
                 
-                standort_daten.append({
+                standort_daten_from_folder.append({
                     "location": location_from_filename,
                     "custom_name": custom_name,
                     "timestamp": timestamp_str,
@@ -162,10 +182,82 @@ def get_standorte(folder=STANDORTE_FOLDER):
             except Exception as e_general:
                 print(f"Unerwarteter Fehler beim Verarbeiten der Datei '{filepath}': {e_general}")
 
+    standort_daten_to_process = []
+
+    if not routendatei:
+        standort_daten_to_process = standort_daten_from_folder
+    else:
+        if not os.path.exists(routendatei):
+            print(f"Warnung: Routendatei '{routendatei}' nicht gefunden. Es werden keine Standorte zurückgegeben.")
+            return []
+
+        try:
+            with open(routendatei, 'r', encoding='utf-8') as f_route:
+                route_entries = json.load(f_route)
+            if not isinstance(route_entries, list):
+                print(f"Warnung: Inhalt von Routendatei '{routendatei}' ist keine Liste. Keine Standorte können gefiltert werden.")
+                return []
+        except json.JSONDecodeError:
+            print(f"Warnung: Routendatei '{routendatei}' enthält ungültiges JSON. Keine Standorte können gefiltert werden.")
+            return []
+        except Exception as e:
+            print(f"Fehler beim Lesen der Routendatei '{routendatei}': {e}")
+            return []
+
+        added_standort_filenames = set() # Verhindert Duplikate, falls mehrere Routenpunkte auf denselben Standort zeigen
+        DISTANCE_THRESHOLD = POSITION_CULLING
+
+        for route_entry in route_entries:
+            route_coord_str = route_entry.get("coord")
+            route_time_str = route_entry.get("time", "N/A") # Zeitstempel aus der Routendatei für die Meldung
+
+            if not route_coord_str:
+                continue # Routen-Eintrag ohne Koordinaten überspringen
+
+            route_lat, route_lon = _parse_coord_string_to_floats(route_coord_str)
+            if route_lat is None or route_lon is None:
+                print(f"Info: Route-Koordinaten '{route_coord_str}' konnten nicht geparst werden.")
+                continue
+
+            matched_standort_in_folder = None
+
+            # 1. Exakte Übereinstimmung prüfen
+            for s_data in standort_daten_from_folder:
+                if s_data["location"] == route_coord_str:
+                    matched_standort_in_folder = s_data
+                    break
+            
+            # 2. Wenn keine exakte Übereinstimmung, nach nächstgelegenem innerhalb der Toleranz suchen
+            if not matched_standort_in_folder:
+                closest_s_data_within_threshold = None
+                min_diff_metric = float('inf')
+
+                for s_data in standort_daten_from_folder:
+                    s_loc_str = s_data["location"]
+                    s_lat, s_lon = _parse_coord_string_to_floats(s_loc_str)
+                    if s_lat is None or s_lon is None:
+                        continue 
+
+                    lat_diff = abs(route_lat - s_lat)
+                    lon_diff = abs(route_lon - s_lon)
+
+                    if lat_diff < DISTANCE_THRESHOLD and lon_diff < DISTANCE_THRESHOLD:
+                        current_diff_metric = lat_diff**2 + lon_diff**2 
+                        if current_diff_metric < min_diff_metric:
+                            min_diff_metric = current_diff_metric
+                            closest_s_data_within_threshold = s_data
+                matched_standort_in_folder = closest_s_data_within_threshold
+            
+            if matched_standort_in_folder:
+                if matched_standort_in_folder["original_filename"] not in added_standort_filenames:
+                    standort_daten_to_process.append(matched_standort_in_folder)
+                    added_standort_filenames.add(matched_standort_in_folder["original_filename"])
+            else:
+                print(f"Location {route_coord_str} (Timestamp: {route_time_str}) from route file is not present as a standort in '{folder}'.")
+
     unnamed_standorte = []
     named_standorte = []
-
-    for item in standort_daten:
+    for item in standort_daten_to_process:
         if item["custom_name"] == None:
             unnamed_standorte.append(item)
         else:
