@@ -67,6 +67,7 @@ planner.py
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 start_stop.py
+
     Hinzufügen einer Toggle-Funktion für die Start-Stopp-Aktivität.
 
         Falls `is_recording == true` -> aktives Tracking.
@@ -77,6 +78,7 @@ start_stop.py
 
 
 shutdown.py
+
     Hinzufügen einer Funktion zum Herunterfahren des Systems
 
         Durch das aufrufen von system_shutdown() wird das System direkt heruntergefahren
