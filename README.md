@@ -30,12 +30,27 @@ dateifunktionen.py
         Die Standorte in der Liste werden automatisch gemäß den Anforderungen des Pflichtenhefts sortiert:
         Zuerst alle unbenannten Standorte in chronologischer Reihenfolge, danach alle benannten Standorte in alphabetischer Reihenfolge.
         Die Einträge der Liste haben jeweils das Format (Koordinaten, Name, Zeitstempel), wobei der Eintrag "Name" mit "None" gekennzeichnet ist, wenn der Standort noch nicht benannt wurde (Rot auf der Karte anzeigen).
-        Beispiel:
-        get_standorte() gibt alle Standorte im Standardordner ("Standorte") zurück.
-        get_standorte(None, "2025-06-12\2025-06-12 15-19-38-209885.json") gibt alle Standorte aus, welche in der Route vorkommen und im Standardordner ("Standorte") gespeichert sind.
         Standardparameter:
         "Ordner" : "Standorte"-Ordner im aktuellen Dateipfad - nur Standorte aus dem angegebenen Ordner werden berücksichtigt
         "Dateiname" : Dateipfad einer Routendatei. Falls angegeben, werden nur Standorte (aus dem angegebenen Ordner) ausgegeben, die auch in der Route vorkommen
+        Beispiel:
+        get_standorte() gibt alle Standorte im Standardordner ("Standorte") zurück.
+        get_standorte(None, "2025-06-12\2025-06-12 15-19-38-209885.json") gibt alle Standorte aus, welche in der Route vorkommen und im Standardordner ("Standorte") gespeichert sind.
+
+    delete_routes("Optional:AlterInTagen", "Optional:BasisOrdner")
+        Löscht Routenordner (und deren Inhalt), die älter als das angegebene Alter sind.
+        Routenordner werden anhand ihres Namens identifiziert, der einem Datumsmuster (YYYY-MM-DD) entsprechen muss.
+        Standardparameter:
+        "AlterInTagen" : 100 (Ordner, die älter als 100 Tage sind, werden gelöscht).
+        "BasisOrdner" : "." (der gleiche Ordner wie das ausgeführte Programm).
+        Beispiel:
+        delete_routes() löscht alle Routenordner im aktuellen Ordner ("."), die älter als 100 Tage sind.
+        delete_routes(-1) löscht alle Routenordner, inklusive dem Routenordner vom aktuellen Tag.
+        delete_routes(0) löscht alle Routenordner außer dem vom aktuellen Datum.
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
