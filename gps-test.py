@@ -124,3 +124,7 @@ else:
 
 print("\nSTANDORTLISTE (alle Standorte aus dem Standardordner):")
 print(dateifunktionen.get_standorte())
+
+print("\nLösche Routen, die älter sind als (Zeit in Tagen angeben; gestern = älter als 0 Tage, heute = älter als -1 Tage): ")
+alter = input()
+dateifunktionen.delete_routes(alter_in_tagen=int(alter))
