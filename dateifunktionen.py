@@ -2,7 +2,7 @@ import json
 import os # path operations & folder creation
 from datetime import datetime, timedelta, timezone
 
-
+import shutil # For deleting directories
 
 
 
@@ -472,3 +472,39 @@ def gps_json_write(coordinates_str, timestamp_str,  folder=".", filename=str(dat
         print(f"Fehler beim Schreiben in Datei {full_path}: {e}")
     except Exception as e_general:
         print(f"Ein unerwarteter Fehler ist beim Schreiben der JSON-Datei {full_path} aufgetreten: {e_general}")
+
+
+
+def delete_routes(alter_in_tagen=100, base_folder="."):
+    """
+    Löscht alle Routenordner (und deren Inhalt) im base_folder, die älter 
+    als 'alter_in_tagen' sind.
+    Routenordner werden anhand ihres Namens identifiziert, der einem Datumsmuster 
+    (YYYY-MM-DD) entsprechen muss.
+
+    Args:
+        alter_in_tagen (int): Das maximale Alter der Ordner in Tagen. Ordner, die älter sind, werden gelöscht.
+        base_folder (str, optional): Der Basisordner, in dem nach Routenordnern gesucht wird. 
+                                     Standardmäßig der aktuelle Ordner (".").
+    """
+    if not os.path.isdir(base_folder):
+        print(f"Fehler: Der angegebene Basisordner '{base_folder}' existiert nicht oder ist kein Ordner.")
+        return
+
+    heute = datetime.now().date()
+    print(f"INFO: Suche nach Routenordnern älter als {alter_in_tagen} Tage im Ordner '{os.path.abspath(base_folder)}'...")
+
+    for item_name in os.listdir(base_folder):
+        item_path = os.path.join(base_folder, item_name)
+        if os.path.isdir(item_path):
+            try:
+                folder_date = datetime.strptime(item_name, "%Y-%m-%d").date()
+                if (heute - folder_date).days > alter_in_tagen:
+                    print(f"INFO: Lösche Ordner '{item_path}', da er {(heute - folder_date).days} Tage alt ist (älter als {alter_in_tagen} Tage).")
+                    shutil.rmtree(item_path)
+                    print(f"INFO: Ordner '{item_path}' erfolgreich gelöscht.")
+            except ValueError:
+                # Ordnername entspricht nicht dem Datumsformat YYYY-MM-DD, wird ignoriert.
+                pass
+            except Exception as e:
+                print(f"Fehler beim Löschen des Ordners '{item_path}': {e}")
