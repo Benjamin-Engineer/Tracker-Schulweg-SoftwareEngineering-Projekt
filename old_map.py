@@ -1,21 +1,21 @@
-import tkinter as tk  # GUI-Toolkit
-import tkintermapview  # Karten-Widget für Tkinter
-import random  # Für simulierte GPS-Daten
-import time  # Für Zeitmessung bei Aufenthalten
-import math  # Für Distanzberechnung
+import tkinter as tk  
+import tkintermapview 
+import random  
+import time  
+import math  
 
 class GPSApp:
     def __init__(self, root):
         self.root = root
         self.root.title("GPS Tracker")
 
-        # Erstelle das Karten-Widget mit festgelegter Größe und ohne abgerundete Ecken
+        # Kartenwidget
         self.map_widget = tkintermapview.TkinterMapView(root, width=800, height=600, corner_radius=0)
         self.map_widget.pack(fill="both", expand=True)
-        self.map_widget.set_position(50.7374, 7.0982)  # Setze Startposition auf Bonn
-        self.map_widget.set_zoom(15)  # Setze Zoomstufe
+        self.map_widget.set_position(50.7374, 7.0982)  # (Bonn)
+        self.map_widget.set_zoom(15)
 
-        # Erstelle Button-Leiste für Start/Stop
+        # Start/Stop Button
         self.button_frame = tk.Frame(root)
         self.button_frame.pack()
         self.start_button = tk.Button(self.button_frame, text="Start Route", command=self.start_route)
@@ -23,16 +23,16 @@ class GPSApp:
         self.stop_button = tk.Button(self.button_frame, text="Stop Route", command=self.stop_route)
         self.stop_button.pack(side=tk.LEFT, padx=5)
 
-        # Variablen für das Tracking und die Routenspeicherung
-        self.tracking = False  # Gibt an, ob Tracking aktiv ist
-        self.route_points = []  # Liste der GPS-Punkte der Route
-        self.last_stationary_point = None  # Letzter Punkt für Aufenthaltsprüfung
-        self.stationary_start_time = None  # Startzeit des Aufenthalts
-        self.stationary_marked = False  # Ob Aufenthalt bereits markiert wurde
+        # Traccking/Speicherung der Route
+        self.tracking = False 
+        self.route_points = []  
+        self.last_stationary_point = None  
+        self.stationary_start_time = None  
+        self.stationary_marked = False  
 
-        # Schrittzähler für die GPS-Simulation
+        # GPs-Simulation (Schrittzähler )
         self.simulation_step = 0
-        self.simulation_timer()  # Starte die Simulation
+        self.simulation_timer() 
 
     def start_route(self):
         """Starte das Tracking und setze alle Variablen zurück."""
@@ -42,7 +42,7 @@ class GPSApp:
         self.last_stationary_point = None
         self.stationary_start_time = None
         self.simulation_step = 0
-        self.map_widget.delete_all_path()  # Lösche vorherige Routen von der Karte
+        self.map_widget.delete_all_path() 
         print("Route gestartet")
 
     def stop_route(self):
@@ -85,7 +85,7 @@ class GPSApp:
             lon += random.uniform(-0.0002, 0.0002)
             self.route_points.append((lat, lon))
 
-        # Zeichne die Route auf der Karte, wenn mehr als ein Punkt vorhanden ist
+        
         if len(self.route_points) > 1:
             self.map_widget.set_path(self.route_points)
 
@@ -99,10 +99,9 @@ class GPSApp:
         Wenn ja, markiere diesen Punkt auf der Karte.
         """
         if self.stationary_marked:
-            return  # Bereits markiert
-
+            return 
         if self.last_stationary_point is None:
-            # Erster Punkt für Aufenthaltsprüfung
+            
             self.last_stationary_point = (lat, lon)
             self.stationary_start_time = time.time()
         else:
@@ -115,7 +114,7 @@ class GPSApp:
                     self.stationary_marked = True
                     print("Längerer Aufenthalt erkannt und markiert.")
             else:
-                # Bewegung erkannt, Aufenthaltsprüfung zurücksetzen
+                
                 self.last_stationary_point = (lat, lon)
                 self.stationary_start_time = time.time()
 
@@ -124,7 +123,7 @@ class GPSApp:
         """
         Berechnet die Entfernung zwischen zwei GPS-Koordinaten in Metern.
         """
-        R = 6371000  # Erdradius in Metern
+        R = 6371000  
         phi1, phi2 = math.radians(lat1), math.radians(lat2)
         dphi = math.radians(lat2 - lat1)
         dlambda = math.radians(lon2 - lon1)
@@ -132,7 +131,7 @@ class GPSApp:
         return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 if __name__ == "__main__":
-    # Starte die Anwendung
+    
     root = tk.Tk()
     app = GPSApp(root)
     root.mainloop()
