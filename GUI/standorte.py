@@ -1,123 +1,74 @@
 from pathlib import Path
 
-# from tkinter import *
-# Explicit imports to satisfy Flake8
-from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
+import tkinter as tk
 
+# Explicit imports to satisfy Flake8
+from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, font
+from PIL import Image
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
+ASSETS_PATH = OUTPUT_PATH / Path(r"/Users/Danny/Desktop/software-projekt_schulwegtracker/SCRUM21/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
 
 
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
 
 
-window = Tk()
+class standortepage(tk.Frame):
+    def __init__(self, parent, controller):
+        super().__init__(parent)
+        self.controller = controller
+        
+        self.canvas = tk.Canvas(
+            self,
+            bg="#353333",
+            height=1080,
+            width=1920,
+            bd=0,
+            highlightthickness=0,
+            relief="ridge"
+        )
+        self.canvas.place(x=0, y=0)
 
-window.geometry("1920x1080")
-window.configure(bg = "#353333")
+        # platzhalter karte - Meeting mit Hossein/Mohammed
+        self.karte_image = tk.PhotoImage(file=relative_to_assets("karte.png"))
+        self.canvas.create_image(640.0, 540.0, image=self.karte_image)
 
+        self.create_button("ausschalten.png", 51.0, 929.0, 
+                         lambda: print("Shutdown clicked"), 100.0, 100.0) #funktion ausschalten einfügen
 
-canvas = Canvas(
-    window,
-    bg = "#353333",
-    height = 1080,
-    width = 1920,
-    bd = 0,
-    highlightthickness = 0,
-    relief = "ridge"
-)
+        self.canvas.create_rectangle(
+            1278.0, 0.0, 1919.0, 1079.0,
+            fill="#353333", outline="#FFFFFF"
+        )
 
-canvas.place(x = 0, y = 0)
+        self.create_button("standorte.png", 1280.0, 0.0,
+                         lambda: print("Standorte clicked"), 640.0, 216.0) #nichts tun
 
-karte_image = PhotoImage(
-    file=relative_to_assets("karte.png")) #platzhalter kartenfunktion
-karte = canvas.create_image(
-    640.0,
-    540.0,
-    image=karte_image
-)
+        self.create_button("ausklappen.png", 1071.0, 0.0,
+                         lambda: self.controller.show_frame(standorte_menüpage), 
+                         218.0, 218.0)
 
-ausschalten_image = PhotoImage(
-    file=relative_to_assets("ausschalten.png"))
-ausschalten = Button(
-    image=ausschalten_image,
-    borderwidth=0,
-    highlightthickness=0,
-    command=lambda: print("ausschalten clicked"),
-    relief="flat"
-)
-ausschalten.place(
-    x=51.0,
-    y=929.0,
-    width=100.0,
-    height=100.0
-)
+        # plathalter dateiaufruf json
+        self.canvas.create_rectangle(
+            1282.0, 218.0, 1918.0, 918.0,
+            fill="#000000", outline=""
+        )
 
-canvas.create_rectangle(
-    1278.0,
-    0.0,
-    1919.0,
-    1079.0,
-    fill="#353333",
-    outline="#FFFFFF")
+        self.create_button("zurück.png", 1460.0, 930.0,
+                         lambda: self.controller.show_frame(startpage), 
+                         280.0, 97.67442321777344)
 
-canvas.place(x = 0, y = 0)
-standorte_image = PhotoImage(
-    file=relative_to_assets("standorte.png"))
-standorte = Button(
-    image=standorte_image,
-    borderwidth=0,
-    highlightthickness=0,
-    command=lambda: print("standorte clicked"), #nichts tun?
-    relief="flat"
-)
-standorte.place(
-    x=1280.0,
-    y=0.0,
-    width=640.0,
-    height=216.0
-)
-
-ausklappen_image = PhotoImage(
-    file=relative_to_assets("ausklappen.png"))
-ausklappen = Button(
-    image=ausklappen_image,
-    borderwidth=0,
-    highlightthickness=0,
-    command=lambda: print("ausklappen clicked"), #aufruf standorte_menü
-    relief="flat"
-)
-ausklappen.place(
-    x=1071.0,
-    y=0.0,
-    width=218.0,
-    height=218.0
-)
-
-canvas.create_rectangle(
-    1282.0,
-    218.0,
-    1918.0,
-    918.0,
-    fill="#000000",
-    outline="")
-
-zurück_image = PhotoImage(
-    file=relative_to_assets("zurück.png"))
-zurück = Button(
-    image=zurück_image,
-    borderwidth=0,
-    highlightthickness=0,
-    command=lambda: print("zurück clicked"), #aufruf start
-    relief="flat"
-)
-zurück.place(
-    x=1460.0,
-    y=930.0,
-    width=280.0,
-    height=97.67442321777344
-)
-window.resizable(False, False)
-window.mainloop()
+    def create_button(self, image_path, x, y, command, width, height):
+        img = tk.PhotoImage(file=relative_to_assets(image_path))
+        btn = tk.Button(
+            self,
+            image=img,
+            borderwidth=0,
+            highlightthickness=0,
+            command=command,
+            relief="flat"
+        )
+        btn.image = img  
+        btn.place(x=x, y=y, width=width, height=height)
+        return btn

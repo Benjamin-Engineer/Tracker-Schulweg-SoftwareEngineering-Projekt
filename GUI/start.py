@@ -1,139 +1,54 @@
 from pathlib import Path
 
-# from tkinter import *
+import tkinter as tk
+
 # Explicit imports to satisfy Flake8
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
 from PIL import Image
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
+ASSETS_PATH = OUTPUT_PATH / Path(r"/Users/Danny/Desktop/software-projekt_schulwegtracker/SCRUM21/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
 
 
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
 
+class startpage(tk.Frame):
+    def __init__(self, parent, controller):
+        super().__init__(parent)
+        self.controller = controller
+        
+        self.canvas = tk.Canvas(
+            self,
+            bg="#353333",
+            height=1080,
+            width=1920,
+            bd=2,
+            highlightthickness=0,
+            relief="ridge"
+        )
+        self.canvas.place(x=0, y=0)
 
-window = Tk()
+        self.create_button("export.png", 1280, 0, lambda: print("Export clicked"))
+        self.create_button("einstellungen.png", 1280, 216, lambda: controller.show_frame(einstellungenpage))
+        self.create_button("standorte.png", 1280, 432, lambda: controller.show_frame(standorte_menüpage))
+        self.create_button("routen.png", 1280, 648, lambda: controller.show_frame(routen_menüpage))
+        self.create_button("start.png", 1280, 864, lambda: controller.show_frame(trackingpage)) #funktion einfügen start tracking
+        self.create_button("ausschalten.png", 51, 929, lambda: print("Shutdown"))
 
-window.geometry("1920x1080")
-window.configure(bg = "#353333")
+        # Platzhalter für Kartenfunktion - Meeting mit Hossein
+        self.karte_image = tk.PhotoImage(file=relative_to_assets("karte.png"))
+        self.canvas.create_image(640.0, 540.0, image=self.karte_image)
 
-
-canvas = Canvas(
-    window,
-    bg = "#353333",
-    height = 1080,
-    width = 1920,
-    bd = 2,
-    highlightthickness = 0,
-    relief = "ridge"
-)
-
-canvas.place(x = 0, y = 0)
-export_image = PhotoImage(
-    file=relative_to_assets("export.png"))
-export = Button(
-    image=export_image,
-    borderwidth=0,
-    highlightthickness=0,
-    command=lambda: print("Export clicked"), #Funktionsaufruf Export einfügen
-    relief="flat"
-)
-export.place(
-    x=1280.0,
-    y=0.0,
-    width=640.0,
-    height=216.0
-)
-
-einstellungen_image = PhotoImage(
-    file=relative_to_assets("einstellungen.png"))
-einstellungen = Button(
-    image=einstellungen_image,
-    borderwidth=0,
-    highlightthickness=0,
-    command=lambda: print("Einstellungen clicked"), #Aufruf Screen Einstellungen
-    relief="flat"
-)
-einstellungen.place(
-    x=1280.0,
-    y=216.0,
-    width=640.0,
-    height=216.0
-)
-
-standorte_image = PhotoImage(
-    file=relative_to_assets("standorte.png"))
-standorte = Button(
-    image=standorte_image,
-    borderwidth=0,
-    highlightthickness=0,
-    command=lambda: print("standorte clicked"), #Aufruf Standorte
-    relief="flat"
-)
-standorte.place(
-    x=1280.0,
-    y=432.0,
-    width=640.0,
-    height=216.0
-)
-
-routen_image = PhotoImage(
-    file=relative_to_assets("routen.png"))
-routen = Button(
-    image=routen_image,
-    borderwidth=0,
-    highlightthickness=0,
-    command=lambda: print("routen clicked"), #Aufruf Routen
-    relief="flat"
-)
-routen.place(
-    x=1280.0,
-    y=648.0,
-    width=640.0,
-    height=216.0
-)
-
-start_image = PhotoImage(
-    file=relative_to_assets("start.png"))
-start = Button(
-    image=start_image,
-    borderwidth=0,
-    highlightthickness=0,
-    command=lambda: print("start clicked"), #start tracking aufrufen
-    relief="flat"
-)
-start.place(
-    x=1280.0,
-    y=864.0,
-    width=640.0,
-    height=216.0
-)
-
-#Platzhalter für funktion der Karte
-
-karte_image = PhotoImage(
-    file=relative_to_assets("karte.png"))
-karte = canvas.create_image(
-    640.0,
-    540.0,
-    image=karte_image
-)
-
-ausschalten_image = PhotoImage(
-    file=relative_to_assets("ausschalten.png"))
-ausschalten = Button(
-    image=ausschalten_image,
-    borderwidth=0,
-    highlightthickness=0,
-    command=lambda: print("ausschalten clicked"), #ausschalten Funnktion einfügen
-    relief="flat"
-)
-ausschalten.place(
-    x=51.0,
-    y=929.0,
-    width=100.0,
-    height=100.0
-)
-window.resizable(False, False)
-window.mainloop()
+    def create_button(self, image_path, x, y, command):
+        img = tk.PhotoImage(file=relative_to_assets(image_path))
+        btn = tk.Button(
+            self,
+            image=img,
+            borderwidth=0,
+            highlightthickness=0,
+            command=command,
+            relief="flat"
+        )
+        btn.image = img
+        btn.place(x=x, y=y, width=640, height=216)

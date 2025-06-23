@@ -13,8 +13,7 @@ ASSETS_PATH = OUTPUT_PATH / Path(r"/Users/Danny/Desktop/software-projekt_schulwe
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
 
-
-class standorte_menüpage(tk.Frame):
+class routen_menüpage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -24,7 +23,7 @@ class standorte_menüpage(tk.Frame):
             bg="#353333",
             height=1080,
             width=1920,
-            bd=0,
+            bd=2,
             highlightthickness=0,
             relief="ridge"
         )
@@ -34,39 +33,38 @@ class standorte_menüpage(tk.Frame):
                            lambda: print("Export clicked"), 640, 216) #einfügen exportfunktion
         self.create_button("einstellungen_grau.png", 1280, 216, 
                            lambda: self.controller.show_frame(einstellungenpage), 640, 216)
-        self.create_button("standorte.png", 1280, 432, 
-                           lambda: print("standorte clicked"), 640, 216)
-        self.create_button("routen_grau.png", 1280, 648, 
-                           lambda: self.controller.show_frame(routen_menüpage), 640, 216)
+        self.create_button("standorte_grau.png", 1280, 432, 
+                           lambda: self.controller.show_frame(standorte_menüpage), 640, 216)
+        self.create_button("routen.png", 1280, 648, 
+                           lambda: print("Routen clicked"), 640, 216)
         self.create_button("start_grau.png", 1280, 864, 
                            lambda: self.controller.show_frame(startpage), 640, 216) #funktion einfügen start tracking
-        
+
+        self.create_button("routen.png", 640.0, 0.0, 
+                          lambda: print("Routen clicked"), 640.0, 216.0)
+
+        self.canvas.create_line(640.0, 0.0, 640.0, 1080.0, fill="#FFFFFF", width=4)
+
         # platzhalter karte - Meeting mit Hossein/Mohammed
         self.karte_image = tk.PhotoImage(file=relative_to_assets("karte.png"))
         self.canvas.create_image(640.0, 540.0, image=self.karte_image)
 
-        text_img = tk.PhotoImage(file=relative_to_assets("standorte.png"))
-        self.canvas.create_image(960.0, 110.0, image=text_img)
-        self.canvas.image = text_img  
+        self.canvas.create_rectangle(638.0, 0.0, 1278.0, 1078.0, fill="#353333", outline="#FFFFFF")
 
-        self.canvas.create_line(
-            640.0, 0.0, 640.0, 1080.0, fill="#FFFFFF", width=4
-        )
-        self.canvas.create_rectangle( #platzhalter dateiaufruf json
-            642.0, 218.0, 1277.0, 918.0, fill="#000000"
-        )
-        self.canvas.create_rectangle(
-            2.0, 2.0, 638.0, 1078.0, fill="#353333"
-        )
+        self.canvas.create_rectangle(642.0, 218.0, 1278.0, 773.0, fill="#000000", outline="") #platzhalter dateiaufruf json
+
 
         self.create_button("ausschalten.png", 51.0, 929.0,
-                          lambda: print("Shutdown clicked"), 100.0, 100.0) #ausschaltenfunktion einfügen
-        
-        self.create_button("zurück.png", 819.0, 930.0,
-                          lambda: self.controller.show_frame(startpage), 280.0, 97.0)
+                          lambda: print("Shutdown clicked"), 100.0, 100.0) #funktion ausschalten einfügen
+
+        self.create_button("routen_löschen.png", 819.0, 782.0,
+                          lambda: print("Delete route clicked"), 280.0, 97.67442321777344) #funktion routen löschen einfügen
 
         self.create_button("einklappen.png", 417.0, 0.0,
-                          lambda: self.controller.show_frame(standortepage), 225.0, 218.0)
+                          lambda: self.controller.show_frame(routenpage), 225.0, 218.0)
+
+        self.create_button("zurück.png", 819.0, 930.0,
+                          lambda: self.controller.show_frame(startpage), 280.0, 97.67442321777344)
 
     def create_button(self, image_path, x, y, command, width, height):
         img = tk.PhotoImage(file=relative_to_assets(image_path))
