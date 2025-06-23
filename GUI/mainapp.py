@@ -1,0 +1,40 @@
+from pathlib import Path
+import tkinter as tk
+# Explicit imports to satisfy Flake8
+from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, font
+
+from start import startpage
+from tracking import trackingpage
+from gesperrt import gesperrtpage
+from einstellungen import einstellungenpage
+from pin_ändern import pin_ändernpage
+from planer import planerpage
+from standorte_menü import standorte_menüpage
+from standorte import standortepage
+from routen_menü import routen_menüpage
+from routen import routenpage
+
+class mainappclass(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.geometry("1920x1080")
+        self.configure(bg="#353333")
+        self.resizable(False, False)
+        
+        container = tk.Frame(self)
+        container.pack(side="top", fill="both", expand=True)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+        self.frames = {}
+        
+        for F in (startpage, trackingpage, gesperrtpage, einstellungenpage, pin_ändernpage, planerpage, standorte_menüpage, standortepage, routen_menüpage, routenpage):
+            frame = F(parent=container, controller=self)
+            self.frames[F] = frame
+            frame.grid(row=0, column=0, sticky="nsew")
+
+        self.show_frame(startpage)
+
+    def show_frame(self, page_class):
+        frame = self.frames[page_class]
+        frame.tkraise()
