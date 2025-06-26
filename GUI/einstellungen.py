@@ -7,14 +7,22 @@ from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
 from PIL import Image
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"/Users/Danny/Desktop/software-projekt_schulwegtracker/SCRUM21/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
+ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
 
 
 def relative_to_assets(path: str) -> Path:
+    ASSETS_PATH = Path(__file__).parent / "assets"
     return ASSETS_PATH / Path(path)
+    
 class einstellungenpage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
+        from standorte_menü import standorte_menüpage
+        from routen_menü import routen_menüpage
+        from start import startpage
+        from tracking import trackingpage
+        from planer import planerpage
+        from pin_ändern import pin_ändernpage
         self.controller = controller
         
         self.canvas = tk.Canvas(
@@ -29,15 +37,15 @@ class einstellungenpage(tk.Frame):
         self.canvas.place(x=0, y=0)
 
         self.create_button("export_grau.png", 1280, 0, 
-                           lambda: print("Export clicked")), #exportfunktion einfügen
+                           lambda: print("Export clicked"), 640, 216), #exportfunktion einfügen
         self.create_button("einstellungen.png", 1280, 216, 
-                           lambda: print("Already on Einstellungen")), #nichts ausgeben?
+                           lambda: print("Already on Einstellungen"), 640, 216), #nichts ausgeben?
         self.create_button("standorte_grau.png", 1280, 432, 
-                           lambda: self.controller.show_frame(standorte_menüpage)),
+                           lambda: self.controller.show_frame(standorte_menüpage), 640, 216),
         self.create_button("routen_grau.png", 1280, 648, 
-                           lambda: self.controller.show_frame(routen_menüpage)),
+                           lambda: self.controller.show_frame(routen_menüpage), 640, 216),
         self.create_button("start_grau.png", 1280, 864, 
-                           lambda: self.controller.show_frame(trackingpage)) #funktion einfügen start tracking
+                           lambda: self.controller.show_frame(trackingpage), 640, 216) #funktion einfügen start tracking
         self.create_button("planer.png", 738, 312, 
                          lambda: self.controller.show_frame(planerpage), 440, 240)
         self.create_button("pin_ändern.png", 102, 312, 

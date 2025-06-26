@@ -8,10 +8,11 @@ from PIL import Image
 
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"/Users/Danny/Desktop/software-projekt_schulwegtracker/SCRUM21/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
+ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
 
 
 def relative_to_assets(path: str) -> Path:
+    ASSETS_PATH = Path(__file__).parent / "assets"
     return ASSETS_PATH / Path(path)
 
 class gesperrtpage(tk.Frame):
@@ -55,6 +56,7 @@ class gesperrtpage(tk.Frame):
         return btn
 
     def handle_unlock(self):
+        from start import startpage
         print("Unlock attempt")
         #einfügen des öffnen eines entry feldes
         #import pin.py -check pin if else für pin abfrage

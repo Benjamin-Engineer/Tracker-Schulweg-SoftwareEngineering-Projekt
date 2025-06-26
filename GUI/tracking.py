@@ -7,15 +7,20 @@ from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
 from PIL import Image
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"/Users/Danny/Desktop/software-projekt_schulwegtracker/SCRUM21/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
+ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
 
 
 def relative_to_assets(path: str) -> Path:
+    ASSETS_PATH = Path(__file__).parent / "assets"
     return ASSETS_PATH / Path(path)
 
 class trackingpage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
+        from einstellungen import einstellungenpage
+        from standorte_menü import standorte_menüpage
+        from routen_menü import routen_menüpage
+        from start import startpage
         self.controller = controller
         
         self.canvas = tk.Canvas(
@@ -29,18 +34,18 @@ class trackingpage(tk.Frame):
         )
         self.canvas.place(x=0, y=0)
 
-        self.create_button("export.png", 1280, 0, lambda: print("Export clicked"))
-        self.create_button("einstellungen.png", 1280, 216, lambda: controller.show_frame(einstellungenpage))
-        self.create_button("standorte.png", 1280, 432, lambda: controller.show_frame(standorte_menüpage))
-        self.create_button("routen.png", 1280, 648, lambda: controller.show_frame(routen_menüpage))
-        self.create_button("stop.png", 1280, 864, lambda: controller.show_frame(startpage)) #funktion einfügen stop tracking
-        self.create_button("ausschalten.png", 51, 929, lambda: print("Shutdown"))
+        self.create_button("export.png", 1280, 0, lambda: print("Export clicked"), 640, 216)
+        self.create_button("einstellungen.png", 1280, 216, lambda: controller.show_frame(einstellungenpage), 640, 216)
+        self.create_button("standorte.png", 1280, 432, lambda: controller.show_frame(standorte_menüpage), 640, 216)
+        self.create_button("routen.png", 1280, 648, lambda: controller.show_frame(routen_menüpage), 640, 216)
+        self.create_button("stop.png", 1280, 864, lambda: controller.show_frame(startpage), 640, 216) #funktion einfügen stop tracking
+        self.create_button("ausschalten.png", 51, 929, lambda: print("Shutdown"), 100.0, 100.0)
 
         # Platzhalter für Kartenfunktion - Meeting mit Hossein
         self.karte_image = tk.PhotoImage(file=relative_to_assets("karte.png"))
         self.canvas.create_image(640.0, 540.0, image=self.karte_image)
 
-    def create_button(self, image_path, x, y, command):
+    def create_button(self, image_path, x, y, command, width, height):
         img = tk.PhotoImage(file=relative_to_assets(image_path))
         btn = tk.Button(
             self,
@@ -51,4 +56,4 @@ class trackingpage(tk.Frame):
             relief="flat"
         )
         btn.image = img
-        btn.place(x=x, y=y, width=640, height=216)
+        btn.place(x=x, y=y, width=width, height=height)

@@ -14,6 +14,14 @@ from standorte import standortepage
 from routen_menü import routen_menüpage
 from routen import routenpage
 
+OUTPUT_PATH = Path(__file__).parent
+ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
+
+
+def relative_to_assets(path: str) -> Path:
+    ASSETS_PATH = Path(__file__).parent / "assets"
+    return ASSETS_PATH / Path(path)
+
 class mainappclass(tk.Tk):
     def __init__(self):
         super().__init__()

@@ -7,15 +7,18 @@ from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, font
 from PIL import Image
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"/Users/Danny/Desktop/software-projekt_schulwegtracker/SCRUM21/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
+ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
 
 
 def relative_to_assets(path: str) -> Path:
+    ASSETS_PATH = Path(__file__).parent / "assets"
     return ASSETS_PATH / Path(path)
 
 class routenpage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
+        from routen_menü import routen_menüpage
+        from start import startpage
         self.controller = controller
         
         self.canvas = tk.Canvas(
