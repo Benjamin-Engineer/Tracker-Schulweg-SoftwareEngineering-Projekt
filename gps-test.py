@@ -4,10 +4,17 @@ import os # Für Pfadoperationen wie os.path.join und os.path.exists
 import teststandorte_generieren
 
 
-# Welche Testdatendatei soll verwendet werden?
+# VOREINSTELLUNGEN.
+
+# Welche Testdatendatei soll verwendet werden? (die Testdatendatei sollte echte erfasste Rohdaten für eine Route oder simulierte Daten im gleichen Format enthalten)
 listendatei = "testdaten_extrapoliert.txt"
 #listendatei = "testdaten.txt"
 
+# Sollen die erfassten Testdaten in der Konsole ausgegeben werden? (um zu überprüfen, ob die Testdatendatei richtig erkannt und gelesen wird - ziemlich viele Zeilen, also Standardmäßig aus)
+zeige_testdaten_in_konsole = False
+
+# Sollen Teststandorte erstellt werden? (Standorte, die in einer Route erkannt werden, werden immer automatisch erstellt - es geht vielmehr darum, get_standorte() zu demonstrieren und zu testen, dass gps_json_write() vorhandene Standorte richtig erkennt & keine Duplikate erzeugt)
+teststandorte_erstellen = True
 
 def load_data_from_file(filepath):
     """Liest Daten aus einer angegebenen .txt-Datei aus und gibt sie als Liste zurück, die von "dateifunktionen" verwendet werden kann.
@@ -47,22 +54,18 @@ def load_data_from_file(filepath):
 daten = load_data_from_file(listendatei) # testdaten.txt muss sich im gleichen Ordner wie gps-test.py befinden
 
 
-
-
-def gps_test(data_list):
-    # Verwendung von enumerate für eine sauberere Schleife
-    for i, item in enumerate(data_list):
-        print(i, item)
-
 # Gibt die Liste der Daten über print() aus. Nummerierung ist in der json nicht vorhanden
-if daten:
-    gps_test(daten)
-else:
-    print(listendatei, "enthält keine Daten.")
+if zeige_testdaten_in_konsole:
+    if daten:
+        for i, item in enumerate(daten):
+            print(i, item)
+    else:
+        print(listendatei, "enthält keine Daten.")
 
 
-# Erstellt zum Testen Standortdateien, darunter auch eine bereits benannte Standortdatei, welche in der Testroute vorkommt
-teststandorte_generieren.erstelle_test_standortdateien()
+if teststandorte_erstellen: # kann in den Voreinstellungen angepasst werden
+    # Erstellt zum Testen Standortdateien, darunter auch eine bereits benannte Standortdatei, welche in der Testroute vorkommt
+    teststandorte_generieren.erstelle_test_standortdateien()
 
 # Definiert den Ordner für die Routen-JSON-Datei.
 parent_folder = str(datetime.date.today())
@@ -127,4 +130,7 @@ print(dateifunktionen.get_standorte())
 
 print("\nLösche Routen, die älter sind als (Zeit in Tagen angeben; gestern = älter als 0 Tage, heute = älter als -1 Tage): ")
 alter = input()
-dateifunktionen.delete_routes(alter_in_tagen=int(alter))
+try:
+    dateifunktionen.delete_routes(alter_in_tagen=int(alter))
+except:
+    print("delete_routes-Test abgebrochen: ungültige Eingabe")

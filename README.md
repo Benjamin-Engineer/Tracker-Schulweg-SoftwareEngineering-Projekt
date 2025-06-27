@@ -3,15 +3,13 @@ Repository für das Projekt im Modul "Grundlagen des Software Engineering" über
 
 dateifunktionen.py
 
-    gps_json_write(Koordinaten, Zeitstempel, "Optional:Ordner", "Optional:Dateiname", "Optional:Culling-Toleranz", "Optional:Standorterkennungszeit")
+    gps_json_write(Koordinaten, Zeitstempel, "Optional:Ordner", "Optional:Dateiname")
       Formatiert die angegebenen Koordinaten sowie den Zeitstempel und schreibt sie in eine JSON-Routendatei. Gegebenenfalls wird eine neue Datei erstellt.
       Erkennt Standorte und erstellt automatisch Standortdateien für diese im Standardordner von `erstelle_standortdatei` (siehe weiter unten).
       Standardparameter:
       "Ordner" : der gleiche Ordner wie das ausgeführte Programm.
       "Dateiname" : aktuelle Zeit im Format "YYYY-MM-DD_HH-MM-SS.json".
-      "Culling-Toleranz": 0.0001 (entspricht 1,1112 Metern).
-      "Standorterkennungszeit": 15 (Angabe in Minuten; 15 Minuten sind im Pflichtenheft spezifiziert).
-    
+
     erstelle_standortdatei(Koordinaten, Zeitstempel, "Optional:Ordner")
         Erstellt eine Standortdatei (.txt) mit den angegebenen Koordinaten und dem Zeitstempel.
         Der Speicherordner kann beim Aufruf angepasst werden (für dieses Projekt nicht notwendig).
