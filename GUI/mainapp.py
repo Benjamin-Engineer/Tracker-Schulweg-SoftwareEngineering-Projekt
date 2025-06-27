@@ -15,7 +15,8 @@ from routen_menü import routen_menüpage
 from routen import routenpage
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
+#ASSETS_PATH = OUTPUT_PATH / Path(r"GUI\assets") # WINDOWS
+#ASSETS_PATH = OUTPUT_PATH / Path(r"GUI/assets") # LINUX
 
 
 def relative_to_assets(path: str) -> Path:
