@@ -6,6 +6,13 @@ import tkinter as tk
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
 from PIL import Image
 
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from shutdown import system_shutdown
+
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
 
@@ -39,7 +46,7 @@ class startpage(tk.Frame):
         self.create_button("standorte.png", 1280, 432, lambda: controller.show_frame(standorte_menüpage), 640, 216)
         self.create_button("routen.png", 1280, 648, lambda: controller.show_frame(routen_menüpage), 640, 216)
         self.create_button("start.png", 1280, 864, lambda: controller.show_frame(trackingpage), 640, 216) #funktion einfügen start tracking
-        self.create_button("ausschalten.png", 51, 929, lambda: print("Shutdown"), 100, 100)
+        self.create_button("ausschalten.png", 51, 929, system_shutdown, 100, 100)
 
         # Platzhalter für Kartenfunktion - Meeting mit Hossein
         self.karte_image = tk.PhotoImage(file=relative_to_assets("karte.png"))

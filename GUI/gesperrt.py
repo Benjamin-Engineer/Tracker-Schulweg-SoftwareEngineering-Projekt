@@ -6,6 +6,12 @@ import tkinter as tk
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, font
 from PIL import Image
 
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from shutdown import system_shutdown
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
@@ -35,7 +41,7 @@ class gesperrtpage(tk.Frame):
                           lambda: self.handle_unlock(), 640.0, 1080.0)
 
         self.create_button("ausschalten.png", 51.0, 929.0,
-                          lambda: print("Shutdown clicked"), 100.0, 100.0) #ausschaltenfunktion einfügen
+                          system_shutdown, 100.0, 100.0) #ausschaltenfunktion einfügen
         
         # Platzhalter für kartenfunktion - Meeting mit Hossein/Mohammed
         self.karte_image = tk.PhotoImage(file=relative_to_assets("karte.png"))

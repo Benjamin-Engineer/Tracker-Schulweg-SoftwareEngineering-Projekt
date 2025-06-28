@@ -6,6 +6,13 @@ import tkinter as tk
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, font
 from PIL import Image
 
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from shutdown import system_shutdown
+
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
 
@@ -40,7 +47,7 @@ class routenpage(tk.Frame):
                           lambda: print("Routen clicked"), 640.0, 216.0)
 
         self.create_button("ausschalten.png", 51.0, 929.0,
-                          lambda: print("Shutdown clicked"), 100.0, 100.0) #funktion ausschalten einfügen
+                          system_shutdown, 100.0, 100.0) #funktion ausschalten einfügen
 
         self.canvas.create_rectangle(
             1278.0, 0.0, 1919.0, 1079.0,
