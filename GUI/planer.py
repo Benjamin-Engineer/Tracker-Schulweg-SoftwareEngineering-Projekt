@@ -6,6 +6,14 @@ import tkinter as tk
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, font
 from PIL import Image
 
+import sys
+import os
+
+import datetime
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from planner import save_entries
+from functools import partial #Für die erstellung von partiellen funktionen durch bereits bestehende mit argumenten
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
@@ -67,11 +75,11 @@ class planerpage(tk.Frame):
         
         self.canvas.create_rectangle(100.0, 285.0, 500.0, 735.0, fill="#353333", outline="#FFFFFF")
         
-        self.eingabe_von = self.create_entry(302.0, 586.0, 190.0, 137.0)
+        self.eingabe_von = self.create_entry(302.0, 586.0, 190.0, 137.0) #Entfernen von self. um es zu einer variable zu machen
         self.eingabe_bis = self.create_entry(302.0, 437.0, 196.0, 145.0)
-        
+                
         self.create_button("hinzufügen.png", 109, 294,
-                         lambda: print("hinzufügen clicked"), 382, 141) #funktion einfügen save_entries - import planner.py
+                         lambda: save_entries(self.eingabe_bis.get().strip(), self.eingabe_von.get().strip()), 382, 141) #funktion einfügen save_entries - import planner.py
         
         self.canvas.create_rectangle(782.0, 285.0, 1182.0, 735.0, fill="#353333", outline="#FFFFFF")
         self.canvas.create_rectangle(804.0, 437.0, 1156.0, 584.0, fill="#000000", outline="")

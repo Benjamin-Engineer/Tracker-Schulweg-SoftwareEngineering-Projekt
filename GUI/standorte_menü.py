@@ -72,7 +72,7 @@ class standorte_menüpage(tk.Frame):
         )
 
         self.create_button("ausschalten.png", 51.0, 929.0,
-                          system_shutdown, 100.0, 100.0) #ausschaltenfunktion einfügen
+                          lambda: system_shutdown(), 100.0, 100.0) #ausschaltenfunktion einfügen
         
         self.create_button("zurück.png", 819.0, 930.0,
                           lambda: self.controller.show_frame(startpage), 280.0, 97.0)

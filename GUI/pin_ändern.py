@@ -6,6 +6,13 @@ import tkinter as tk
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, font
 from PIL import Image
 
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from pin import change_pin
+
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
 
@@ -48,13 +55,13 @@ class pin_ändernpage(tk.Frame):
                            lambda: self.controller.show_frame(startpage), 640, 216) #funktion einfügen start tracking
 
 
-        self.eingabe_pin_alt = self.create_entry(648.0, 434.0)
-        self.eingabe_pin_neu = self.create_entry(648.0, 276.0)
-
+        self.eingabe_pin_alt = self.create_entry(648.0, 276.0) 
+        self.eingabe_pin_neu = self.create_entry(648.0, 434.0)
+           
         self.create_button("zurück_einstellungen.png", 500.0, 804.0, 
                           lambda: self.controller.show_frame(einstellungenpage), 280, 120)
         self.create_button("bestätigen.png", 500.0, 634.0, 
-                          print("bestätigen clicked"), 280, 120) #einfügen von pin.py - aufruf funktion change pin
+                          lambda: change_pin(self.eingabe_pin_alt.get().strip(), self.eingabe_pin_neu.get().strip(), self.eingabe_pin_neu.get().strip()) ,280, 120) #einfügen von pin.py - aufruf funktion change pin -- Ruft change_pin auf, aber eingabe läuft nicht korrekt @Danny
 
         self.canvas.create_rectangle(-1.0, 213.0, 1280.0, 215.0, fill="#353333", outline="#FFFFFF")
         self.canvas.create_rectangle(290.0, 267.0, 990.0, 583.0, fill="#353333", outline="#FFFFFF")

@@ -41,7 +41,7 @@ class gesperrtpage(tk.Frame):
                           lambda: self.handle_unlock(), 640.0, 1080.0)
 
         self.create_button("ausschalten.png", 51.0, 929.0,
-                          system_shutdown, 100.0, 100.0) #ausschaltenfunktion einfügen
+                          lambda: system_shutdown(), 100.0, 100.0) #ausschaltenfunktion einfügen
         
         # Platzhalter für kartenfunktion - Meeting mit Hossein/Mohammed
         self.karte_image = tk.PhotoImage(file=relative_to_assets("karte.png"))

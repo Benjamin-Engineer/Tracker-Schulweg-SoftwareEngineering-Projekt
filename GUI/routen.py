@@ -47,7 +47,7 @@ class routenpage(tk.Frame):
                           lambda: print("Routen clicked"), 640.0, 216.0)
 
         self.create_button("ausschalten.png", 51.0, 929.0,
-                          system_shutdown, 100.0, 100.0) #funktion ausschalten einfügen
+                          lambda: system_shutdown(), 100.0, 100.0) #funktion ausschalten einfügen
 
         self.canvas.create_rectangle(
             1278.0, 0.0, 1919.0, 1079.0,

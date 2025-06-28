@@ -46,7 +46,7 @@ class startpage(tk.Frame):
         self.create_button("standorte.png", 1280, 432, lambda: controller.show_frame(standorte_menüpage), 640, 216)
         self.create_button("routen.png", 1280, 648, lambda: controller.show_frame(routen_menüpage), 640, 216)
         self.create_button("start.png", 1280, 864, lambda: controller.show_frame(trackingpage), 640, 216) #funktion einfügen start tracking
-        self.create_button("ausschalten.png", 51, 929, system_shutdown, 100, 100)
+        self.create_button("ausschalten.png", 51, 929, lambda: system_shutdown(), 100, 100)
 
         # Platzhalter für Kartenfunktion - Meeting mit Hossein
         self.karte_image = tk.PhotoImage(file=relative_to_assets("karte.png"))

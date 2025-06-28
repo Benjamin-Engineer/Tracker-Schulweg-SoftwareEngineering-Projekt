@@ -9,7 +9,7 @@ def default_pin(): # Setzt die Standard PIN zu
 
 def get_pin(): # Lädt die PIN aus der Datei
     with open(PIN_FILE, "r") as f:
-        f_contents = f.read()
+        f_contents = f.read().strip()
         return f_contents
 
 def check_pin(entered_pin): # Vergleicht eingegebene PIN mit gespeicherter PIN
@@ -20,6 +20,7 @@ def set_pin(new_pin): # Setzt neue PIN über das eingabe fenster
         f.write(new_pin)
 
 def change_pin(alte_pin, new_pin, confirm_pin): # Ändert die PIN
+    default_pin()
     if check_pin(alte_pin):
         if new_pin == confirm_pin: 
             if new_pin.isdigit() or len(new_pin) < 6:
@@ -35,3 +36,5 @@ def change_pin(alte_pin, new_pin, confirm_pin): # Ändert die PIN
     else: # falsche PIN zum überprüfen eingegeben.
         print("PIN ist falsch")
         return False
+
+#change_pin(input("ALte PIN: "), input("Neue Pin: "), input("Confirm PIN: "))

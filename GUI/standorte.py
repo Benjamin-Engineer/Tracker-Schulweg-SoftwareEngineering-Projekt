@@ -45,7 +45,7 @@ class standortepage(tk.Frame):
         self.canvas.create_image(640.0, 540.0, image=self.karte_image)
 
         self.create_button("ausschalten.png", 51.0, 929.0, 
-                         system_shutdown, 100.0, 100.0) #funktion ausschalten einfügen
+                        lambda: system_shutdown(), 100.0, 100.0) #funktion ausschalten einfügen
 
         self.canvas.create_rectangle(
             1278.0, 0.0, 1919.0, 1079.0,

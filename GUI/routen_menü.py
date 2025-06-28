@@ -67,7 +67,7 @@ class routen_menüpage(tk.Frame):
 
 
         self.create_button("ausschalten.png", 51.0, 929.0,
-                          system_shutdown, 100.0, 100.0) #funktion ausschalten einfügen
+                          lambda: system_shutdown(), 100.0, 100.0) #funktion ausschalten einfügen
 
         self.create_button("routen_löschen.png", 819.0, 782.0,
                           lambda: print("Delete route clicked"), 280.0, 97.67442321777344) #funktion routen löschen einfügen
