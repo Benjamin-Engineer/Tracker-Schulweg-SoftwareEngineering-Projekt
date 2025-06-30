@@ -13,7 +13,7 @@ import datetime
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from planner import save_entries
-from functools import partial #Für die erstellung von partiellen funktionen durch bereits bestehende mit argumenten
+from start_stop import toggle_status
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
@@ -54,7 +54,7 @@ class planerpage(tk.Frame):
         self.create_button("routen_grau.png", 1280, 648, 
                            lambda: self.controller.show_frame(routen_menüpage), 640, 216)
         self.create_button("start_grau.png", 1280, 864, 
-                           lambda: self.controller.show_frame(startpage), 640, 216) #funktion einfügen start tracking
+                           lambda: toggle_status(), 640, 216) #funktion einfügen start tracking
 
         self.create_button("zurück_einstellungen.png", 500, 804,
                          lambda: self.controller.show_frame(einstellungenpage), 280, 120)

@@ -11,6 +11,7 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from start_stop import toggle_status
 from shutdown import system_shutdown
 
 OUTPUT_PATH = Path(__file__).parent
@@ -51,7 +52,7 @@ class standorte_menüpage(tk.Frame):
         self.create_button("routen_grau.png", 1280, 648, 
                            lambda: self.controller.show_frame(routen_menüpage), 640, 216)
         self.create_button("start_grau.png", 1280, 864, 
-                           lambda: self.controller.show_frame(startpage), 640, 216) #funktion einfügen start tracking
+                           lambda: toggle_status(), 640, 216) #funktion einfügen start tracking
         
         # platzhalter karte - Meeting mit Hossein/Mohammed
         self.karte_image = tk.PhotoImage(file=relative_to_assets("karte.png"))
