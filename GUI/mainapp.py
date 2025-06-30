@@ -15,7 +15,7 @@ from routen_menü import routen_menüpage
 from routen import routenpage
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
+ASSETS_PATH = OUTPUT_PATH / Path(r"/GUI/assets")
 
 
 def relative_to_assets(path: str) -> Path:
@@ -26,7 +26,7 @@ class mainappclass(tk.Tk):
     def __init__(self):
         super().__init__()
         self.geometry("1920x1080")
-        self.configure(bg="#353333")
+        self.configure(bg="#363434")
         self.resizable(False, False)
         
         container = tk.Frame(self)
