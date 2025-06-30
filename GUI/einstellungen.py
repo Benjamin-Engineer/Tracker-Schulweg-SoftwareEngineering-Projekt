@@ -7,7 +7,7 @@ from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
 from PIL import Image
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
+ASSETS_PATH = OUTPUT_PATH / Path(r"/GUI/assets")
 
 
 def relative_to_assets(path: str) -> Path:
@@ -27,7 +27,7 @@ class einstellungenpage(tk.Frame):
         
         self.canvas = tk.Canvas(
             self,
-            bg="#353333",
+            bg="#363434",
             height=1080,
             width=1920,
             bd=2,
@@ -47,9 +47,9 @@ class einstellungenpage(tk.Frame):
         self.create_button("start_grau.png", 1280, 864, 
                            lambda: self.controller.show_frame(trackingpage), 640, 216) #funktion einfügen start tracking
         self.create_button("planer.png", 738, 312, 
-                         lambda: self.controller.show_frame(planerpage), 440, 240)
+                         lambda: self.controller.show_frame(planerpage), 440, 245)
         self.create_button("pin_ändern.png", 102, 312, 
-                         lambda: self.controller.show_frame(pin_ändernpage), 440, 240)
+                         lambda: self.controller.show_frame(pin_ändernpage), 440, 245)
         self.create_button("zurück_einstellungen.png", 500, 804, 
                          lambda: self.controller.show_frame(startpage), 280, 120)
 
@@ -61,7 +61,8 @@ class einstellungenpage(tk.Frame):
             borderwidth=0,
             highlightthickness=0,
             command=command,
-            relief="flat"
+            relief="flat",
+            background="#363434"
         )
         btn.image = img 
         btn.place(x=x, y=y, width=width, height=height)

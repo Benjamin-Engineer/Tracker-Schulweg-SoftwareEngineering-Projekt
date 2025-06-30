@@ -8,7 +8,7 @@ from PIL import Image
 
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
+ASSETS_PATH = OUTPUT_PATH / Path(r"/GUI/assets")
 
 
 def relative_to_assets(path: str) -> Path:
@@ -28,10 +28,10 @@ class planerpage(tk.Frame):
         
         self.canvas = tk.Canvas(
             self,
-            bg="#353333",
+            bg="#363434",
             height=1080,
             width=1920,
-            bd=0,
+            bd=2,
             highlightthickness=0,
             relief="ridge"
         )
@@ -51,31 +51,34 @@ class planerpage(tk.Frame):
         self.create_button("zurück_einstellungen.png", 500, 804,
                          lambda: self.controller.show_frame(einstellungenpage), 280, 120)
         
-        # Decorative elements
-        self.canvas.create_rectangle(-1.0, 213.0, 1280.0, 215.0, fill="#353333", outline="")
+        self.canvas.create_rectangle(-1.0, 213.0, 1280.0, 215.0, fill="#363434", outline="")
+
+        self.canvas.create_rectangle(0.0, 214.0, 1280.0, 218.0, fill="#FFFFFF", outline="")
         
-        planer_text_img = tk.PhotoImage(file=relative_to_assets("text_planer.png"))
-        self.planer_text = tk.Button(
-            self,
-            image=planer_text_img,
-            borderwidth=0,
-            highlightthickness=0,
-            relief="flat"
-        )
-        self.planer_text.image = planer_text_img
-        self.planer_text.place(x=308.0, y=0.0, width=972.0, height=216.0)
-        
-        self.canvas.create_rectangle(100.0, 285.0, 500.0, 735.0, fill="#353333", outline="#FFFFFF")
-        
+        self.canvas.create_rectangle(100.0, 285.0, 500.0, 735.0, fill="#363434", outline="#FFFFFF")
         self.eingabe_von = self.create_entry(302.0, 586.0, 190.0, 137.0)
         self.eingabe_bis = self.create_entry(302.0, 437.0, 196.0, 145.0)
-        
         self.create_button("hinzufügen.png", 109, 294,
-                         lambda: print("hinzufügen clicked"), 382, 141) #funktion einfügen save_entries - import planner.py
+                         lambda: print("hinzufügen clicked"), 373, 141) #funktion einfügen save_entries - import planner.py
+        self.canvas.create_line(300.0, 436.0, 300.0, 735.0, fill="#FFFFFF")
+        self.canvas.create_line(100.0, 436.0, 500.0, 436.0, fill="#FFFFFF")
+        self.canvas.create_line(100.0, 585.0, 500.0, 585.0, fill="#FFFFFF")
+        self.von_image = tk.PhotoImage(file=relative_to_assets("von.png"))
+        self.canvas.create_image(200.0, 510.0, image=self.von_image)
+        self.bis_image = tk.PhotoImage(file=relative_to_assets("bis.png"))
+        self.canvas.create_image(200.0, 660.0, image=self.bis_image)
         
-        self.canvas.create_rectangle(782.0, 285.0, 1182.0, 735.0, fill="#353333", outline="#FFFFFF")
-        self.canvas.create_rectangle(804.0, 437.0, 1156.0, 584.0, fill="#000000", outline="")
-        self.canvas.create_rectangle(804.0, 586.0, 1156.0, 733.0, fill="#000000", outline="")
+        self.canvas.create_rectangle(782.0, 285.0, 1182.0, 735.0, fill="#363434", outline="#FFFFFF")
+        self.geplant_image = tk.PhotoImage(file=relative_to_assets("geplant.png"))
+        self.canvas.create_image(982.0, 360.0, image=self.geplant_image)
+        self.canvas.create_line(782.0, 436.0, 1182.0, 436.0, fill="#FFFFFF")
+
+
+        # self.canvas.create_rectangle(804.0, 437.0, 1156.0, 584.0, fill="#000000", outline="")
+        # self.canvas.create_rectangle(804.0, 586.0, 1156.0, 733.0, fill="#000000", outline="")
+        
+        self.planer_text_image = tk.PhotoImage(file=relative_to_assets("text_planer.png"))
+        self.canvas.create_image(644.0, 108.0, image=self.planer_text_image)
 
     def create_button(self, image_path, x, y, command, width, height):
         img = tk.PhotoImage(file=relative_to_assets(image_path))
@@ -85,7 +88,8 @@ class planerpage(tk.Frame):
             borderwidth=0,
             highlightthickness=0,
             command=command,
-            relief="flat"
+            relief="flat",
+            background="#363434"
         )
         btn.image = img  
         btn.place(x=x, y=y, width=width, height=height)
@@ -95,7 +99,7 @@ class planerpage(tk.Frame):
         entry = tk.Entry(
             self,
             bd=0,
-            bg="#353333",
+            bg="#363434",
             fg="#FFFFFF",
             highlightthickness=0,
             justify="center",

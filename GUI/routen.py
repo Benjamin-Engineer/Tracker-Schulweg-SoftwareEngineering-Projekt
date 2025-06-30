@@ -7,7 +7,7 @@ from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, font
 from PIL import Image
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
+ASSETS_PATH = OUTPUT_PATH / Path(r"/GUI/assets")
 
 
 def relative_to_assets(path: str) -> Path:
@@ -23,7 +23,7 @@ class routenpage(tk.Frame):
         
         self.canvas = tk.Canvas(
             self,
-            bg="#353333",
+            bg="#363434",
             height=1080,
             width=1920,
             bd=2,
@@ -43,13 +43,15 @@ class routenpage(tk.Frame):
                           lambda: print("Shutdown clicked"), 100.0, 100.0) #funktion ausschalten einfügen
 
         self.canvas.create_rectangle(
-            1278.0, 0.0, 1919.0, 1079.0,
-            fill="#353333", outline="#FFFFFF"
+            1278.0, -2.0, 1919.0, 1079.0,
+            fill="#363434", outline="#FFFFFF"
         )
 
         self.create_button("ausklappen.png", 1071.0, 0.0,
                           lambda: self.controller.show_frame(routen_menüpage),
-                          218.0, 218.0)
+                          208.0, 217.0)
+        
+        self.canvas.create_rectangle(1278.0, -2.0, 1282.0, 1080.0, fill="#FFFFFF", outline="")
 
         # platzhalter dateiaufruf json
         self.canvas.create_rectangle(
@@ -73,7 +75,8 @@ class routenpage(tk.Frame):
             borderwidth=0,
             highlightthickness=0,
             command=command,
-            relief="flat"
+            relief="flat",
+            background="#363434"
         )
         btn.image = img 
         btn.place(x=x, y=y, width=width, height=height)
