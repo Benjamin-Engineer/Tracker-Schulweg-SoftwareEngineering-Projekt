@@ -6,6 +6,13 @@ import tkinter as tk
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
 from PIL import Image
 
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from start_stop import toggle_status
+
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"/GUI/assets")
 
@@ -45,7 +52,7 @@ class einstellungenpage(tk.Frame):
         self.create_button("routen_grau.png", 1280, 648, 
                            lambda: self.controller.show_frame(routen_menüpage), 640, 216),
         self.create_button("start_grau.png", 1280, 864, 
-                           lambda: self.controller.show_frame(trackingpage), 640, 216) #funktion einfügen start tracking
+                           lambda: toggle_status(), 640, 216) #funktion einfügen start tracking
         self.create_button("planer.png", 738, 312, 
                          lambda: self.controller.show_frame(planerpage), 440, 245)
         self.create_button("pin_ändern.png", 102, 312, 

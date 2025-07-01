@@ -6,6 +6,14 @@ import tkinter as tk
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, font
 from PIL import Image
 
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from start_stop import toggle_status
+from shutdown import system_shutdown
+
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"/GUI/assets")
 
@@ -44,7 +52,7 @@ class standorte_menüpage(tk.Frame):
         self.create_button("routen_grau.png", 1280, 648, 
                            lambda: self.controller.show_frame(routen_menüpage), 640, 216)
         self.create_button("start_grau.png", 1280, 864, 
-                           lambda: self.controller.show_frame(startpage), 640, 216) #funktion einfügen start tracking
+                           lambda: toggle_status(), 640, 216) #funktion einfügen start tracking
         
         # platzhalter karte - Meeting mit Hossein/Mohammed
         self.karte_image = tk.PhotoImage(file=relative_to_assets("karte.png"))
@@ -65,7 +73,7 @@ class standorte_menüpage(tk.Frame):
         )
 
         self.create_button("ausschalten.png", 51.0, 929.0,
-                          lambda: print("Shutdown clicked"), 100.0, 100.0) #ausschaltenfunktion einfügen
+                          lambda: system_shutdown(), 100.0, 100.0) #ausschaltenfunktion einfügen
         
         self.create_button("zurück.png", 819.0, 930.0,
                           lambda: self.controller.show_frame(startpage), 280.0, 97.0)

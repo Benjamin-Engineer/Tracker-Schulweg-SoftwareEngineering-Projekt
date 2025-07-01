@@ -6,6 +6,14 @@ import tkinter as tk
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, font
 from PIL import Image
 
+import sys
+import os
+
+import datetime
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from planner import save_entries
+from start_stop import toggle_status
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"/GUI/assets")
@@ -46,7 +54,7 @@ class planerpage(tk.Frame):
         self.create_button("routen_grau.png", 1280, 648, 
                            lambda: self.controller.show_frame(routen_menüpage), 640, 216)
         self.create_button("start_grau.png", 1280, 864, 
-                           lambda: self.controller.show_frame(startpage), 640, 216) #funktion einfügen start tracking
+                           lambda: toggle_status(), 640, 216) #funktion einfügen start tracking
 
         self.create_button("zurück_einstellungen.png", 500, 804,
                          lambda: self.controller.show_frame(einstellungenpage), 280, 120)
@@ -55,11 +63,15 @@ class planerpage(tk.Frame):
 
         self.canvas.create_rectangle(0.0, 214.0, 1280.0, 218.0, fill="#FFFFFF", outline="")
         
+
         self.canvas.create_rectangle(100.0, 285.0, 500.0, 735.0, fill="#363434", outline="#FFFFFF")
+        
         self.eingabe_von = self.create_entry(302.0, 586.0, 190.0, 137.0)
         self.eingabe_bis = self.create_entry(302.0, 437.0, 196.0, 145.0)
+        
         self.create_button("hinzufügen.png", 109, 294,
-                         lambda: print("hinzufügen clicked"), 373, 141) #funktion einfügen save_entries - import planner.py
+                         lambda: save_entries(self.eingabe_bis.get().strip(), self.eingabe_von.get().strip()), 382, 141) # Speichern der einträge
+        
         self.canvas.create_line(300.0, 436.0, 300.0, 735.0, fill="#FFFFFF")
         self.canvas.create_line(100.0, 436.0, 500.0, 436.0, fill="#FFFFFF")
         self.canvas.create_line(100.0, 585.0, 500.0, 585.0, fill="#FFFFFF")
@@ -76,6 +88,7 @@ class planerpage(tk.Frame):
 
         # self.canvas.create_rectangle(804.0, 437.0, 1156.0, 584.0, fill="#000000", outline="")
         # self.canvas.create_rectangle(804.0, 586.0, 1156.0, 733.0, fill="#000000", outline="")
+
         
         self.planer_text_image = tk.PhotoImage(file=relative_to_assets("text_planer.png"))
         self.canvas.create_image(644.0, 108.0, image=self.planer_text_image)

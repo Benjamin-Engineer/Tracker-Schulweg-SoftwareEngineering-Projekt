@@ -6,6 +6,14 @@ import tkinter as tk
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, font
 from PIL import Image
 
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from start_stop import toggle_status
+from shutdown import system_shutdown
+
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"/GUI/assets")
 
@@ -43,7 +51,7 @@ class routen_menüpage(tk.Frame):
         self.create_button("routen.png", 1280, 648, 
                            lambda: print("Routen clicked"), 640, 216)
         self.create_button("start_grau.png", 1280, 864, 
-                           lambda: self.controller.show_frame(startpage), 640, 216) #funktion einfügen start tracking
+                           lambda: toggle_status(), 640, 216) #funktion einfügen start tracking
 
         self.create_button("routen.png", 640.0, 0.0, 
                           lambda: print("Routen clicked"), 640.0, 216.0)
@@ -60,7 +68,7 @@ class routen_menüpage(tk.Frame):
 
 
         self.create_button("ausschalten.png", 51.0, 929.0,
-                          lambda: print("Shutdown clicked"), 100.0, 100.0) #funktion ausschalten einfügen
+                          lambda: system_shutdown(), 100.0, 100.0) #funktion ausschalten einfügen
 
         self.create_button("routen_löschen.png", 819.0, 782.0,
                           lambda: print("Delete route clicked"), 280.0, 97.67442321777344) #funktion routen löschen einfügen

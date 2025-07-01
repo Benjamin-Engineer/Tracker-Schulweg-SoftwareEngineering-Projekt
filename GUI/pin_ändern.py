@@ -6,6 +6,14 @@ import tkinter as tk
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, font
 from PIL import Image
 
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from start_stop import toggle_status
+from pin import change_pin
+
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"/GUI/assets")
 
@@ -45,7 +53,8 @@ class pin_ändernpage(tk.Frame):
         self.create_button("routen_grau.png", 1280, 648, 
                            lambda: self.controller.show_frame(routen_menüpage), 640, 216)
         self.create_button("start_grau.png", 1280, 864, 
-                           lambda: self.controller.show_frame(startpage), 640, 216) #funktion einfügen start tracking
+
+                           lambda: toggle_status(), 640, 216) #funktion für das Starten des Trackens
         
 
         self.pin_ändern_text_image = tk.PhotoImage(file=relative_to_assets("text_pin_ändern.png"))
@@ -53,12 +62,15 @@ class pin_ändernpage(tk.Frame):
         self.canvas.create_rectangle(0.0, 214.0, 1280.0, 218.0, fill="#FFFFFF", outline="")
 
 
-        self.eingabe_pin_alt = self.create_entry(648.0, 434.0)
-        self.eingabe_pin_neu = self.create_entry(648.0, 276.0)
-
+        self.eingabe_pin_alt = self.create_entry(648.0, 276.0) 
+        self.eingabe_pin_neu = self.create_entry(648.0, 434.0)
+           
         self.create_button("zurück_einstellungen.png", 500.0, 804.0, 
                           lambda: self.controller.show_frame(einstellungenpage), 280, 120)
-        self.create_button("bestätigen.png", 500.0, 634.0, lambda: print("bestätigen clicked"), 280, 120) #einfügen von pin.py - aufruf funktion change pin
+
+        self.create_button("bestätigen.png", 500.0, 634.0, 
+                          lambda: change_pin(self.eingabe_pin_alt.get().strip(), self.eingabe_pin_neu.get().strip(), self.eingabe_pin_neu.get().strip()) ,280, 120) # - aufruf funktion change pin -- Ruft change_pin auf
+
 
         self.canvas.create_rectangle(290.0, 267.0, 990.0, 583.0, fill="#363434", outline="#FFFFFF")
         self.canvas.create_line(640.0, 267.0, 640.0, 583.0, fill="#FFFFFF")
@@ -67,6 +79,7 @@ class pin_ändernpage(tk.Frame):
         self.canvas.create_image(470.0, 345.0, image=self.alte_pin_image)
         self.neue_pin_image = tk.PhotoImage(file=relative_to_assets("neue_pin.png"))
         self.canvas.create_image(470.0, 505.0, image=self.neue_pin_image)
+
 
 
     def create_entry(self, x, y):

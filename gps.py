@@ -5,7 +5,7 @@ from datetime import datetime
 
 starttime = str(datetime.now()) # Startzeit des Programms
 
-gps = serial.Serial('/dev/ttyAMA0', baudrate=9600, timeout=1)
+#gps = serial.Serial('/dev/ttyAMA0', baudrate=9600, timeout=1)
 
 def tracker():
     systime = str(datetime.now())
