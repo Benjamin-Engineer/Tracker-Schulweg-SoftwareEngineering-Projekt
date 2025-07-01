@@ -637,3 +637,61 @@ def delete_routes(alter_in_tagen=100, base_folder="."):
                 print(f"Fehler beim Löschen des Ordners '{item_path}': {e}")
     if routes_deleted == 0:
         print(f"Keine Routen gefunden, die älter als {alter_in_tagen} Tage sind.")
+
+
+
+def parse_coord_string_to_floats(coord_str):
+    """
+    Parst einen Koordinaten-String ("lat lon") in zwei Float-Werte.
+    Gibt (lat, lon) oder (None, None) bei Fehler zurück.
+    """
+    try:
+        parts = coord_str.split()
+        if len(parts) == 2:
+            lat = float(parts[0])
+            lon = float(parts[1])
+            return lat, lon
+        return None, None
+    except ValueError:
+        return None, None
+
+
+
+def routendatei_zu_liste(routendatei):
+    """
+    Liest eine Routendatei (JSON) und gibt alle Koordinaten als eine einzige Liste von Floats zurück.
+
+    Args:
+        routendatei (str): Der relative Pfad zur JSON-Routendatei.
+
+    Returns:
+        list: Eine Liste aller Koordinaten-Floats ([lat1, lon1, lat2, lon2, ...])
+              oder eine leere Liste bei Fehlern.
+    """
+    koordinaten_liste = []
+    try:
+        with open(routendatei, 'r', encoding='utf-8') as f:
+            routen_daten = json.load(f)
+
+        if not isinstance(routen_daten, list):
+            print(f"Warnung: Inhalt von '{routendatei}' ist keine Liste.")
+            return []
+
+        for eintrag in routen_daten:
+            koordinaten_str = eintrag.get("coord")
+            if koordinaten_str:
+                lat, lon = parse_coord_string_to_floats(koordinaten_str)
+                if lat is not None and lon is not None:
+                    koordinaten_liste.append(lat)
+                    koordinaten_liste.append(lon)
+    except FileNotFoundError:
+        print(f"Fehler: Routendatei '{routendatei}' nicht gefunden.")
+        return []
+    except json.JSONDecodeError:
+        print(f"Fehler: Ungültiges JSON in Routendatei '{routendatei}'.")
+        return []
+    except Exception as e:
+        print(f"Ein unerwarteter Fehler ist aufgetreten: {e}")
+        return []
+    
+    return koordinaten_liste
