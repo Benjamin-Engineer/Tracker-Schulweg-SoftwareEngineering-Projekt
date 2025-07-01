@@ -7,18 +7,40 @@ import osmnx as ox
 import networkx as nx 
 import dateifunktionen
 
-def split_coordinates_string_to_floats(coord_str):
+def split_coordinates_string_to_floats(coord_tpl):
     """
     Splits a coordinate string "lat lon" into two float values (latitude, longitude).
     Returns (latitude, longitude) or (None, None) if parsing fails.
     """
     try:
-        lat_str, lon_str = coord_str.split()
-        lat = float(lat_str)
-        lon = float(lon_str)
+        lat_flt, lon_flt = coord_tpl.split()
+        lat = float(lat_flt)
+        lon = float(lon_flt)
         return lat, lon
     except ValueError:
         return None, None
+
+def parse_coordinates(coords):
+    """
+    Parses coordinates from a string "lat lon" or a tuple/list (lat, lon).
+    Returns (latitude, longitude) as floats, or (None, None) if parsing fails.
+    """
+    if isinstance(coords, str):
+        try:
+            lat_str, lon_str = coords.split()
+            lat = float(lat_str)
+            lon = float(lon_str)
+            return lat, lon
+        except ValueError:
+            return None, None
+    elif isinstance(coords, (tuple, list)) and len(coords) == 2:
+        try:
+            lat = float(coords[0])
+            lon = float(coords[1])
+            return lat, lon
+        except (ValueError, TypeError):
+            return None, None
+    return None, None
 
 class GPSApp:
     def __init__(self, root):
@@ -103,12 +125,15 @@ class GPSApp:
     def standorte(self):
         standortliste = dateifunktionen.get_standorte()
         for i in standortliste:
+            lat, lon = split_coordinates_string_to_floats(standortliste[i][0])
             marker = self.map_widget.set_marker(lat, lon, text=standortliste[i][1])
             if standortliste[i][1]:
                 marker.canvas_item.config(font=("Arial", 14, "bold"), fill="brown")
             else:
                 marker.canvas_item.config(font=("Arial", 14, "bold"), fill="red")
 
+
+#standortliste[i][0][0], standortliste[i][0][1],
 
 if __name__ == "__main__":
     
