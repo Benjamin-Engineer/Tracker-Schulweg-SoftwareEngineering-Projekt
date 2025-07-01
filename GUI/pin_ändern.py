@@ -15,7 +15,7 @@ from start_stop import toggle_status
 from pin import change_pin
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
+ASSETS_PATH = OUTPUT_PATH / Path(r"/GUI/assets")
 
 
 def relative_to_assets(path: str) -> Path:
@@ -34,10 +34,10 @@ class pin_ändernpage(tk.Frame):
         
         self.canvas = tk.Canvas(
             self,
-            bg="#353333",
+            bg="#363434",
             height=1080,
             width=1920,
-            bd=0,
+            bd=2,
             highlightthickness=0,
             relief="ridge"
         )
@@ -53,7 +53,13 @@ class pin_ändernpage(tk.Frame):
         self.create_button("routen_grau.png", 1280, 648, 
                            lambda: self.controller.show_frame(routen_menüpage), 640, 216)
         self.create_button("start_grau.png", 1280, 864, 
-                           lambda: toggle_status(), 640, 216) #funktion einfügen start tracking
+
+                           lambda: toggle_status(), 640, 216) #funktion für das Starten des Trackens
+        
+
+        self.pin_ändern_text_image = tk.PhotoImage(file=relative_to_assets("text_pin_ändern.png"))
+        self.canvas.create_image(644.0, 108.0, image=self.pin_ändern_text_image)
+        self.canvas.create_rectangle(0.0, 214.0, 1280.0, 218.0, fill="#FFFFFF", outline="")
 
 
         self.eingabe_pin_alt = self.create_entry(648.0, 276.0) 
@@ -61,19 +67,26 @@ class pin_ändernpage(tk.Frame):
            
         self.create_button("zurück_einstellungen.png", 500.0, 804.0, 
                           lambda: self.controller.show_frame(einstellungenpage), 280, 120)
-        self.create_button("bestätigen.png", 500.0, 634.0, 
-                          lambda: change_pin(self.eingabe_pin_alt.get().strip(), self.eingabe_pin_neu.get().strip(), self.eingabe_pin_neu.get().strip()) ,280, 120) #einfügen von pin.py - aufruf funktion change pin -- Ruft change_pin auf, aber eingabe läuft nicht korrekt @Danny
 
-        self.canvas.create_rectangle(-1.0, 213.0, 1280.0, 215.0, fill="#353333", outline="#FFFFFF")
-        self.canvas.create_rectangle(290.0, 267.0, 990.0, 583.0, fill="#353333", outline="#FFFFFF")
-        self.canvas.create_rectangle(638.0, 268.0, 639.0, 581.0, fill="#353333", outline="#FFFFFF")
-        self.canvas.create_rectangle(291.0, 424.0, 988.0, 425.0, fill="#353333", outline="#FFFFFF")
+        self.create_button("bestätigen.png", 500.0, 634.0, 
+                          lambda: change_pin(self.eingabe_pin_alt.get().strip(), self.eingabe_pin_neu.get().strip(), self.eingabe_pin_neu.get().strip()) ,280, 120) # - aufruf funktion change pin -- Ruft change_pin auf
+
+
+        self.canvas.create_rectangle(290.0, 267.0, 990.0, 583.0, fill="#363434", outline="#FFFFFF")
+        self.canvas.create_line(640.0, 267.0, 640.0, 583.0, fill="#FFFFFF")
+        self.canvas.create_line(290.0, 425.0, 990.0, 425.0, fill="#FFFFFF")
+        self.alte_pin_image = tk.PhotoImage(file=relative_to_assets("alte_pin.png"))
+        self.canvas.create_image(470.0, 345.0, image=self.alte_pin_image)
+        self.neue_pin_image = tk.PhotoImage(file=relative_to_assets("neue_pin.png"))
+        self.canvas.create_image(470.0, 505.0, image=self.neue_pin_image)
+
+
 
     def create_entry(self, x, y):
         entry = tk.Entry(
             self,
             bd=0,
-            bg="#353333",
+            bg="#363434",
             fg="#FFFFFF",
             highlightthickness=0,
             justify="center",
@@ -90,7 +103,8 @@ class pin_ändernpage(tk.Frame):
             borderwidth=0,
             highlightthickness=0,
             command=command,
-            relief="flat"
+            relief="flat",
+            background="#363434"
         )
         btn.image = img
         btn.place(x=x, y=y, width=width, height=height)

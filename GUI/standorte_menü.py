@@ -15,7 +15,7 @@ from start_stop import toggle_status
 from shutdown import system_shutdown
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
+ASSETS_PATH = OUTPUT_PATH / Path(r"/GUI/assets")
 
 
 def relative_to_assets(path: str) -> Path:
@@ -34,7 +34,7 @@ class standorte_menüpage(tk.Frame):
         
         self.canvas = tk.Canvas(
             self,
-            bg="#353333",
+            bg="#363434",
             height=1080,
             width=1920,
             bd=0,
@@ -69,7 +69,7 @@ class standorte_menüpage(tk.Frame):
             642.0, 218.0, 1277.0, 918.0, fill="#000000"
         )
         self.canvas.create_rectangle(
-            2.0, 2.0, 638.0, 1078.0, fill="#353333"
+            2.0, 2.0, 638.0, 1078.0, fill="#363434"
         )
 
         self.create_button("ausschalten.png", 51.0, 929.0,
@@ -78,8 +78,10 @@ class standorte_menüpage(tk.Frame):
         self.create_button("zurück.png", 819.0, 930.0,
                           lambda: self.controller.show_frame(startpage), 280.0, 97.0)
 
-        self.create_button("einklappen.png", 417.0, 0.0,
-                          lambda: self.controller.show_frame(standortepage), 225.0, 218.0)
+        self.create_button("einklappen.png", 425.0, 0.0,
+                          lambda: self.controller.show_frame(standortepage), 215.0, 216.0)
+        
+        self.canvas.create_rectangle(638.0, 216.0, 642.0, 1080.0, fill="#FFFFFF", outline="")
 
     def create_button(self, image_path, x, y, command, width, height):
         img = tk.PhotoImage(file=relative_to_assets(image_path))
@@ -89,7 +91,8 @@ class standorte_menüpage(tk.Frame):
             borderwidth=0,
             highlightthickness=0,
             command=command,
-            relief="flat"
+            relief="flat",
+            background="#363434"
         )
         btn.image = img  
         btn.place(x=x, y=y, width=width, height=height)

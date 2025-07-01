@@ -14,7 +14,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from shutdown import system_shutdown
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"/home/vboxuser/Schreibtisch/Tracker-Schulweg-SoftwareEngineering-Projekt/GUI/assets")
+ASSETS_PATH = OUTPUT_PATH / Path(r"/GUI/assets")
 
 
 def relative_to_assets(path: str) -> Path:
@@ -32,7 +32,7 @@ class trackingpage(tk.Frame):
         
         self.canvas = tk.Canvas(
             self,
-            bg="#353333",
+            bg="#363434",
             height=1080,
             width=1920,
             bd=2,
@@ -60,7 +60,8 @@ class trackingpage(tk.Frame):
             borderwidth=0,
             highlightthickness=0,
             command=command,
-            relief="flat"
+            relief="flat",
+            background="#363434"
         )
         btn.image = img
         btn.place(x=x, y=y, width=width, height=height)
