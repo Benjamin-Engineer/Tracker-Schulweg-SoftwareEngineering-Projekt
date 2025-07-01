@@ -43,7 +43,25 @@ class mainappclass(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
 
         self.show_frame(startpage)
+        
+        
+        self.timeout = 60000 #60 Sekunden
+
+        self.bind_all("<Any-KeyPress>", self.reset_timer)
+        self.bind_all("<Any-Button>", self.reset_timer)
+        self.bind_all("<Motion>", self.reset_timer)        
+
+        self.timer_id = None
+        self.reset_timer()
+
 
     def show_frame(self, page_class):
         frame = self.frames[page_class]
-        frame.tkraise()
+        frame.tkraise()                    
+
+    def reset_timer(self, event=None):
+        if self.timer_id is not None:
+            self.after_cancel(self.timer_id)
+        self.timer_id = self.after(self.timeout, lambda: self.show_frame(gesperrtpage))
+
+        
