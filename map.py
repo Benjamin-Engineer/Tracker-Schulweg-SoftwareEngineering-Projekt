@@ -107,7 +107,7 @@ class GPSApp:
 
     def standorte(self):
         standortliste = dateifunktionen.get_standorte(routendatei=self.routendatei)
-        for i, entry in enumerate(standortliste):
+        for i, dummy in enumerate(standortliste):
             lat, lon = _parse_coord_string_to_floats(standortliste[i][0])
             marker = self.map_widget.set_marker(lat, lon, text=standortliste[i][1])
             if standortliste[i][1]: # Standort ist schon benannt
