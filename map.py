@@ -1,124 +1,63 @@
 import tkinter as tk  
 import tkintermapview  
-import random  
-import time  
-import math  
+import os
 import osmnx as ox  
 import networkx as nx 
 import dateifunktionen
 
-def _parse_coord_string_to_floats(coord_str):
-    """
-    Parst einen Koordinaten-String ("lat lon") in zwei Float-Werte.
-    Gibt (lat, lon) oder (None, None) bei Fehler zurück.
-    """
-    try:
-        parts = coord_str.split()
-        if len(parts) == 2:
-            lat = float(parts[0])
-            lon = float(parts[1])
-            return lat, lon
-        return None, None
-    except ValueError:
-        return None, None
-
 
 class GPSApp:
-    def __init__(self, root, datei):
+    def __init__(self, root):
         self.root = root
         self.root.title("GPS Tracker")
-
-        self.routendatei = datei
 
         # Kartenwidget
         self.map_widget = tkintermapview.TkinterMapView(root, width=800, height=600, corner_radius=0)
         self.map_widget.pack(fill="both", expand=True)
         self.map_widget.set_position(50.7374, 7.0982)  # (Bonn)
-        self.map_widget.set_zoom(15)  
+        self.map_widget.set_zoom(15)
 
-        self.tracking = False
-        self.route_points = [] 
-        self.last_stationary_point = None
-        self.stationary_start_time = None 
-        self.stationary_marked = False
-
-        # GPs-Simulation (Schrittzähler )
-        self.simulation_step = 0
-        self.simulation_timer()  # Starte die Simulation
-
-        self.standorte()
-
-    def start_route(self):
-        """Starte das Tracking und setze alle Variablen zurück."""
-        self.tracking = True
-        self.route_points = []
-        self.stationary_marked = False
-        self.last_stationary_point = None
-        self.stationary_start_time = None
-        self.simulation_step = 0
-        self.map_widget.delete_all_path() 
-        print("Route gestartet")
-        self.generate_realistic_route() 
-    def generate_realistic_route(self):
-        """
-        Berechnet eine realistische Route auf Straßen in Bonn mit osmnx.
-        Interpoliert die Route so, dass die Schritte ca. 10-20 Meter auseinander liegen.
-        """
-        center_point = (50.7374, 7.0982)
-        G = ox.graph_from_point(center_point, dist=1500, network_type='walk')
-        nodes = list(G.nodes)
-        start_node = ox.nearest_nodes(G, center_point[1], center_point[0])
-        end_node = random.choice(nodes)
-        try:
-            route = nx.shortest_path(G, start_node, end_node, weight='length')
-        except Exception as e:
-            print(f"Routing-Fehler: {e}")
-            return
-        gps_points = [(G.nodes[n]['y'], G.nodes[n]['x']) for n in route]
-       
-        interpolated_points = []
-        for i in range(len(gps_points) - 1):
-            lat1, lon1 = gps_points[i]
-            lat2, lon2 = gps_points[i+1]
-            dist = self.haversine_distance(lat1, lon1, lat2, lon2)
-            steps = max(1, int(dist // 15))  # ca. alle 15 Meter ein Punkt
-            for s in range(steps):
-                frac = s / steps
-                lat = lat1 + (lat2 - lat1) * frac
-                lon = lon1 + (lon2 - lon1) * frac
-                interpolated_points.append((lat, lon))
-        interpolated_points.append(gps_points[-1])
-        self.route_gps_points = interpolated_points
-        self.simulation_step = 0
-        print(f"Route mit {len(self.route_gps_points)} interpolierten Punkten generiert.")
-
-    def stop_route(self):
-        """Beende das Tracking."""
-        self.tracking = False
-        print("Route gestoppt")
-
-    def simulation_timer(self):
-        """Timer, der alle 5 Sekunden neue GPS-Daten simuliert."""
-        if self.tracking:
-            self.simulate_gps_data()
-        self.root.after(5000, self.simulation_timer)  # Wiederhole alle 5 Sekunden (3-5m/s)
+    def route(self, routendatei):
+        """Zeigt die Route einer Routendatei samt all ihrer Standorte an. Bei Live Tracking wiederholt aufrufen zum aktualisieren."""
+        self.route_points = dateifunktionen.routendatei_zu_liste(routendatei)
+        self.map_widget.set_path(self.route_points)
+        self.standorte(routendatei)
         if len(self.route_points) > 1:
-            self.map_widget.set_position(self.route_points[len(self.route_points)-1][0], self.route_points[len(self.route_points)-1][1])
+            deg_x, deg_y = self.route_points[len(self.route_points)-1]
+            self.map_widget.set_position(deg_x,deg_y)
 
-    def standorte(self):
-        standortliste = dateifunktionen.get_standorte(routendatei=self.routendatei)
+    def standort(self, standortdatei):
+        """Zeigt einen einzelnen Standort auf der Karte (für Standortmenü)"""
+        data = dateifunktionen.parse_standort_file(standortdatei)
+        lat, lon = dateifunktionen.parse_coord_string_to_floats(data["location"])
+        marker = self.map_widget.set_marker(lat, lon)
+        if data["custom_name"] == data["location"]: # Standort ist noch nicht benannt = Rot
+                marker.marker_color_circle = "red"
+        else: # Standort ist schon benannt = Braun
+                marker.marker_color_circle = "brown"
+
+
+    def standorte(self, routendatei):
+        standortliste = dateifunktionen.get_standorte(routendatei=routendatei)
         for i, dummy in enumerate(standortliste):
-            lat, lon = _parse_coord_string_to_floats(standortliste[i][0])
-            marker = self.map_widget.set_marker(lat, lon, text=standortliste[i][1])
-            if standortliste[i][1]: # Standort ist schon benannt
+            coords, name, time = standortliste[i]
+            lat, lon = dateifunktionen.parse_coord_string_to_floats(coords)
+            marker = self.map_widget.set_marker(lat, lon, text=name)
+            if name: # Standort ist schon benannt
                 marker.marker_color_circle = "brown"
             else: # Neuer Standort
                 marker.marker_color_circle = "red"
 
 
 # Test
+
+datei = "2025-07-01/2025-07-01 19-57-44-297620.json"
+
+
 if __name__ == "__main__":
 
     root = tk.Tk()
-    app = GPSApp(root, "2025-07-01/2025-07-01 16-29-50-208675.json") # Dateipfade der Routendatei
+    app = GPSApp(root) # Dateipfade der Routendatei
     root.mainloop()
+    #app.standort("Standorte/50.000000 7.000000.txt")
+    app.route("2025-07-01/2025-07-01 19-57-44-297620.json")
