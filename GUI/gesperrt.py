@@ -47,7 +47,7 @@ class gesperrtpage(tk.Frame):
                           lambda: system_shutdown(), 100.0, 100.0) #ausschaltenfunktion einfügen
         
         
-        self.canvas.create_rectangle(1625.0, 200.0, 1775.0, 363.0, fill="#FFFFFF", outline="#FFFFFF")
+        self.canvas.create_rectangle(1425.0, 200.0, 1775.0, 363.0, fill="#FFFFFF", outline="#FFFFFF")
         self.eingabe_pin = self.create_entry(1427.0, 202.0)
     
         
@@ -85,7 +85,7 @@ class gesperrtpage(tk.Frame):
 
     def handle_unlock(self):
         from start import startpage
-        if(check_pin(self.eingabe_pin)):{
+        if(check_pin(self.eingabe_pin.get().strip())):{
         self.controller.show_frame(startpage)
         }
         else :{

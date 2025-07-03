@@ -13,6 +13,7 @@ def get_pin(): # Lädt die PIN aus der Datei
         return f_contents
 
 def check_pin(entered_pin): # Vergleicht eingegebene PIN mit gespeicherter PIN
+    default_pin()
     return entered_pin == get_pin()
 
 def set_pin(new_pin): # Setzt neue PIN über das eingabe fenster
