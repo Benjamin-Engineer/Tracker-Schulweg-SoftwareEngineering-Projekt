@@ -9,6 +9,8 @@ from PIL import Image
 import sys
 import os
 
+from pin import check_pin
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from shutdown import system_shutdown
@@ -25,7 +27,8 @@ class gesperrtpage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
-        
+        self.font = ("Inter", 36)
+
         self.canvas = tk.Canvas(
             self,
             bg="#363434",
@@ -42,6 +45,11 @@ class gesperrtpage(tk.Frame):
 
         self.create_button("ausschalten.png", 51.0, 929.0,
                           lambda: system_shutdown(), 100.0, 100.0) #ausschaltenfunktion einfügen
+        
+        
+        self.canvas.create_rectangle(1625.0, 200.0, 1775.0, 363.0, fill="#FFFFFF", outline="#FFFFFF")
+        self.eingabe_pin = self.create_entry(1427.0, 202.0)
+    
         
         # Platzhalter für kartenfunktion - Meeting mit Hossein/Mohammed
         self.karte_image = tk.PhotoImage(file=relative_to_assets("karte.png"))
@@ -61,10 +69,25 @@ class gesperrtpage(tk.Frame):
         btn.image = img  
         btn.place(x=x, y=y, width=width, height=height)
         return btn
+    
+    def create_entry(self, x, y):
+        entry = tk.Entry(
+            self,
+            bd=2,
+            bg="#363434",
+            fg="#FFFFFF",
+            highlightthickness=0,
+            justify="center",
+            font=self.font
+        )
+        entry.place(x=x, y=y, width=343.0, height=155.0)
+        return entry
 
     def handle_unlock(self):
         from start import startpage
-        print("Unlock attempt")
-        #einfügen des öffnen eines entry feldes
-        #import pin.py -check pin if else für pin abfrage
+        if(check_pin(self.eingabe_pin)):{
         self.controller.show_frame(startpage)
+        }
+        else :{
+            print("Falsche PIN! Bitte erneut eingeben.")
+        }
