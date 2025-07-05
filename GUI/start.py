@@ -13,6 +13,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from start_stop import toggle_status
 from shutdown import system_shutdown
+from map_widget import MapWidget
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"/GUI/assets")
@@ -42,16 +43,16 @@ class startpage(tk.Frame):
         )
         self.canvas.place(x=0, y=0)
 
+        # Initialize and place the map widget first (so it doesn't cover other buttons)
+        self.map_widget = MapWidget(self, width=1280, height=1080)
+        self.map_widget.place(x=0, y=0)
+
         self.create_button("export.png", 1280, 0, lambda: print("Export clicked"), 640, 216)
         self.create_button("einstellungen.png", 1280, 216, lambda: controller.show_frame(einstellungenpage), 640, 216)
         self.create_button("standorte.png", 1280, 432, lambda: controller.show_frame(standorte_menüpage), 640, 216)
         self.create_button("routen.png", 1280, 648, lambda: controller.show_frame(routen_menüpage), 640, 216)
         self.create_button("start.png", 1280, 864, lambda: toggle_status(), 640, 216) #funktion einfügen start tracking
         self.create_button("ausschalten.png", 51, 929, lambda: system_shutdown(), 100, 100)
-
-        # Platzhalter für Kartenfunktion - Meeting mit Hossein
-        self.karte_image = tk.PhotoImage(file=relative_to_assets("karte.png"))
-        self.canvas.create_image(640.0, 540.0, image=self.karte_image)
 
     def create_button(self, image_path, x, y, command, width, height):
         img = tk.PhotoImage(file=relative_to_assets(image_path))
