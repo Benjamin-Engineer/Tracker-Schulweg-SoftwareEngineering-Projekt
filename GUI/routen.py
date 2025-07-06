@@ -12,6 +12,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from shutdown import system_shutdown
+from map_widget import MapWidget
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"/GUI/assets")
@@ -39,9 +40,9 @@ class routenpage(tk.Frame):
         )
         self.canvas.place(x=0, y=0)
 
-        # Map image
-        self.karte_image = tk.PhotoImage(file=relative_to_assets("karte.png"))
-        self.canvas.create_image(640.0, 540.0, image=self.karte_image)
+        # Initialize and place the map widget for route viewing
+        self.map_widget = MapWidget(self, width=1280, height=1080)
+        self.map_widget.place(x=0, y=0)
 
         self.create_button("routen.png", 1280.0, 0.0, 
                           lambda: print("Routen clicked"), 640.0, 216.0)
@@ -88,3 +89,10 @@ class routenpage(tk.Frame):
         btn.image = img 
         btn.place(x=x, y=y, width=width, height=height)
         return btn
+
+    def display_route(self, route_file):
+        """
+        Display a specific route on the map
+        """
+        if route_file and self.map_widget:
+            self.map_widget.route(route_file)

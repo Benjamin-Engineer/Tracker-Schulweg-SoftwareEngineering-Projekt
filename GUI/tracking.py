@@ -12,6 +12,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from shutdown import system_shutdown
+from map_widget import MapWidget
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"/GUI/assets")
@@ -48,9 +49,9 @@ class trackingpage(tk.Frame):
         self.create_button("stop.png", 1280, 864, lambda: controller.show_frame(startpage), 640, 216) #funktion einfügen stop tracking
         self.create_button("ausschalten.png", 51, 929, lambda: system_shutdown(), 100.0, 100.0)
 
-        # Platzhalter für Kartenfunktion - Meeting mit Hossein
-        self.karte_image = tk.PhotoImage(file=relative_to_assets("karte.png"))
-        self.canvas.create_image(640.0, 540.0, image=self.karte_image)
+        # Initialize and place the map widget - this will show live tracking
+        self.map_widget = MapWidget(self, width=1280, height=1080)
+        self.map_widget.place(x=0, y=0)
 
     def create_button(self, image_path, x, y, command, width, height):
         img = tk.PhotoImage(file=relative_to_assets(image_path))
@@ -65,3 +66,11 @@ class trackingpage(tk.Frame):
         )
         btn.image = img
         btn.place(x=x, y=y, width=width, height=height)
+
+    def update_live_tracking(self, route_file=None):
+        """
+        Update the map with live tracking data
+        Call this method periodically during active tracking
+        """
+        if route_file and self.map_widget:
+            self.map_widget.route(route_file)

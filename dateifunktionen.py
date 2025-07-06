@@ -630,3 +630,47 @@ def delete_routes(alter_in_tagen=100, base_folder="."):
                 print(f"Fehler beim Löschen des Ordners '{item_path}': {e}")
     if routes_deleted == 0:
         print(f"Keine Routen gefunden, die älter als {alter_in_tagen} Tage sind.")
+
+def routendatei_zu_liste(routendatei):
+    """
+    Lädt eine JSON-Routendatei und konvertiert sie in eine Liste von Koordinaten-Tupeln.
+    
+    Args:
+        routendatei (str): Pfad zur JSON-Routendatei
+        
+    Returns:
+        list: Liste von (lat, lon) Tupeln oder leere Liste bei Fehler
+    """
+    try:
+        with open(routendatei, 'r', encoding='utf-8') as f:
+            route_data = json.load(f)
+        
+        if not isinstance(route_data, list):
+            print(f"Warnung: Routendatei '{routendatei}' enthält keine Liste.")
+            return []
+        
+        coordinates_list = []
+        for entry in route_data:
+            if isinstance(entry, dict) and "coord" in entry:
+                coord_str = entry["coord"]
+                lat, lon = _parse_coord_string_to_floats(coord_str)
+                if lat is not None and lon is not None:
+                    coordinates_list.append((lat, lon))
+        
+        return coordinates_list
+        
+    except FileNotFoundError:
+        print(f"Fehler: Routendatei '{routendatei}' nicht gefunden.")
+        return []
+    except json.JSONDecodeError:
+        print(f"Fehler: Ungültiges JSON in Routendatei '{routendatei}'.")
+        return []
+    except Exception as e:
+        print(f"Fehler beim Laden der Routendatei '{routendatei}': {e}")
+        return []
+
+def parse_coord_string_to_floats(coord_str):
+    """
+    Öffentliche Version der _parse_coord_string_to_floats Funktion für externen Zugriff.
+    """
+    return _parse_coord_string_to_floats(coord_str)

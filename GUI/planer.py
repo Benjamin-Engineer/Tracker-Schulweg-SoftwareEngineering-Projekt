@@ -3,7 +3,7 @@ from pathlib import Path
 import tkinter as tk
 
 # Explicit imports to satisfy Flake8
-from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, font
+from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, font, ttk
 from PIL import Image
 
 import sys
@@ -12,7 +12,7 @@ import os
 import datetime
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from planner import save_entries
+from planner import save_entries, load_entries
 from start_stop import toggle_status
 
 OUTPUT_PATH = Path(__file__).parent
@@ -70,7 +70,7 @@ class planerpage(tk.Frame):
         self.eingabe_bis = self.create_entry(302.0, 437.0, 196.0, 145.0)
         
         self.create_button("hinzufügen.png", 109, 294,
-                         lambda: save_entries(self.eingabe_bis.get().strip(), self.eingabe_von.get().strip()), 382, 141) # Speichern der einträge
+                         lambda: save_entries(self.eingabe_bis.get().strip(), self.eingabe_von.get().strip(), callback = tabelle) , 382, 141) # Speichern der einträge
         
         self.canvas.create_line(300.0, 436.0, 300.0, 735.0, fill="#FFFFFF")
         self.canvas.create_line(100.0, 436.0, 500.0, 436.0, fill="#FFFFFF")
@@ -79,11 +79,43 @@ class planerpage(tk.Frame):
         self.canvas.create_image(200.0, 510.0, image=self.von_image)
         self.bis_image = tk.PhotoImage(file=relative_to_assets("bis.png"))
         self.canvas.create_image(200.0, 660.0, image=self.bis_image)
-        
         self.canvas.create_rectangle(782.0, 285.0, 1182.0, 735.0, fill="#363434", outline="#FFFFFF")
         self.geplant_image = tk.PhotoImage(file=relative_to_assets("geplant.png"))
         self.canvas.create_image(982.0, 360.0, image=self.geplant_image)
         self.canvas.create_line(782.0, 436.0, 1182.0, 436.0, fill="#FFFFFF")
+        
+        ## TABELLE für Planer output 
+        
+        self.geplant_table_frame = tk.Frame(self.canvas, bg="#363434") #Frame für die Tabelle
+        
+        self.geplant_table = ttk.Treeview( # Erstellen der Tabelle
+            self.geplant_table_frame,
+            columns=("Von", "Bis"),
+            show="headings",
+            height=3
+        )
+        
+        self.geplant_table.heading("Von", text="Von")
+        self.geplant_table.heading("Bis", text="Bis")
+        self.geplant_table.pack()
+        
+        
+        self.canvas.create_window(982.0, 585.0, window=self.geplant_table_frame)
+        
+        def tabelle():
+            
+            for entry in self.geplant_table.get_children():
+                self.geplant_table.delete(entry)
+            
+            for entry in load_entries():
+                self.geplant_table.insert("", "end", values=(
+                    entry.get("von"),
+                    entry.get("bis")
+                ))
+        tabelle()
+            
+        ##
+
 
 
         # self.canvas.create_rectangle(804.0, 437.0, 1156.0, 584.0, fill="#000000", outline="")
