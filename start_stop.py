@@ -6,13 +6,16 @@ is_recording = False
 now = datetime.datetime.now().time()
 
 
-def toggle_status(): # Button Funktion zum ändern des aufzeichen von Aktiv -> Inaktiv -> Aktiv ...
+def toggle_status(callback = None): # Button Funktion zum ändern des aufzeichen von Aktiv -> Inaktiv -> Aktiv ...
     global is_recording
     
     is_recording = not is_recording # Ändert den Status der variable is_recording zwischen "True" und "False"
     
     while is_recording:
         tracker()
+    
+    if callback:
+        callback()
     
 def automatic_start_stop():
     plan = load_entries()

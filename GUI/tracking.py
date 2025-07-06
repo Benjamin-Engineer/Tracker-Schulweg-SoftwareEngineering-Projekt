@@ -11,6 +11,7 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from start_stop import toggle_status
 from shutdown import system_shutdown
 from map_widget import MapWidget
 
@@ -46,7 +47,7 @@ class trackingpage(tk.Frame):
         self.create_button("einstellungen.png", 1280, 216, lambda: controller.show_frame(einstellungenpage), 640, 216)
         self.create_button("standorte.png", 1280, 432, lambda: controller.show_frame(standorte_menüpage), 640, 216)
         self.create_button("routen.png", 1280, 648, lambda: controller.show_frame(routen_menüpage), 640, 216)
-        self.create_button("stop.png", 1280, 864, lambda: controller.show_frame(startpage), 640, 216) #funktion einfügen stop tracking
+        self.create_button("stop.png", 1280, 864, lambda: toggle_status(callback=self.controller.show_frame(trackingpage)), 640, 216) #funktion einfügen stop tracking
         self.create_button("ausschalten.png", 51, 929, lambda: system_shutdown(), 100.0, 100.0)
 
         # Initialize and place the map widget - this will show live tracking
