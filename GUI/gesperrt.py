@@ -41,6 +41,9 @@ class gesperrtpage(tk.Frame):
         )
         self.canvas.place(x=0, y=0)
 
+        # Interaktive Karte auf der linken Seite hinzufügen (wird zuerst erstellt)
+        self.setup_map()
+
         self.create_button("entsperren.png", 1280.0, 0.0, 
                           lambda: self.handle_unlock(), 640.0, 1080.0)
 
@@ -50,11 +53,6 @@ class gesperrtpage(tk.Frame):
         
         self.canvas.create_rectangle(1425.0, 200.0, 1775.0, 363.0, fill="#FFFFFF", outline="#FFFFFF")
         self.eingabe_pin = self.create_entry(1427.0, 202.0)
-    
-        
-        # Platzhalter für kartenfunktion - Meeting mit Hossein/Mohammed
-        self.karte_image = tk.PhotoImage(file=relative_to_assets("karte.png"))
-        self.canvas.create_image(640.0, 540.0, image=self.karte_image)
 
     def create_button(self, image_path, x, y, command, width, height):
         img = tk.PhotoImage(file=relative_to_assets(image_path))
@@ -92,3 +90,21 @@ class gesperrtpage(tk.Frame):
         else :{
             print("Falsche PIN! Bitte erneut eingeben.")
         }
+        
+    def setup_map(self):
+        """Erstellt und platziert die interaktive Karte auf der linken Seite"""
+        try:
+            # Erstelle die Karte mit einer Breite von 1280px (linke Seite) und voller Höhe
+            self.map_widget = MapWidget(self, width=1280, height=1080)
+            self.map_widget.place(x=0, y=0)
+            
+            print("✓ Interaktive Karte im Sperrmodus geladen")
+        except Exception as e:
+            print(f"✗ Fehler beim Laden der Karte: {e}")
+            # Fallback auf das statische Kartenbild
+            try:
+                self.karte_image = tk.PhotoImage(file=relative_to_assets("karte.png"))
+                self.canvas.create_image(640.0, 540.0, image=self.karte_image)
+                print("Fallback: Statisches Kartenbild geladen")
+            except Exception as fallback_error:
+                print(f"Auch Fallback-Kartenbild konnte nicht geladen werden: {fallback_error}")

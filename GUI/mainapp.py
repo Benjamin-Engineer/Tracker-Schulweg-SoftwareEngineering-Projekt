@@ -67,6 +67,21 @@ class mainappclass(tk.Tk):
         # If showing the standorte menu, refresh the standorte list
         from standorte_menü import standorte_menüpage
         if page_class == standorte_menüpage and hasattr(frame, 'on_show'):
+            frame.on_show()
+        
+        # If showing the eingeklappte standorte page, refresh the standorte list
+        from standorte import standortepage
+        if page_class == standortepage and hasattr(frame, 'on_show'):
+            frame.on_show()
+        
+        # If showing the routen menu, refresh the routen list
+        from routen_menü import routen_menüpage
+        if page_class == routen_menüpage and hasattr(frame, 'on_show'):
+            frame.on_show()
+        
+        # If showing the routen page, refresh the routen list
+        from routen import routenpage
+        if page_class == routenpage and hasattr(frame, 'on_show'):
             frame.on_show()                    
 
     def reset_timer(self, event=None):

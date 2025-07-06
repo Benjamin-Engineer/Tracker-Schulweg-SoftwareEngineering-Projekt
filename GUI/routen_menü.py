@@ -76,7 +76,7 @@ class routen_menüpage(tk.Frame):
                           lambda: self.delete_selected_route(), 280.0, 97.67442321777344)
 
         self.create_button("einklappen.png", 425.0, 0.0,
-                          lambda: self.controller.show_frame(startpage), 215.0, 216.0)
+                          lambda: self.controller.show_frame(routenpage), 215.0, 216.0)
 
         self.create_button("zurück.png", 819.0, 930.0,
                           lambda: self.controller.show_frame(startpage), 280.0, 97.67442321777344)
@@ -147,8 +147,8 @@ class routen_menüpage(tk.Frame):
         v_scrollbar.config(command=self.routes_listbox.yview)
         h_scrollbar.config(command=self.routes_listbox.xview)
         
-        # Event-Handler für Auswahl in der Liste hinzufügen
-        self.routes_listbox.bind('<<ListboxSelect>>', self.on_route_select)
+        # Event-Handler für Doppelklick auf Route hinzufügen (statt einfacher Auswahl)
+        self.routes_listbox.bind('<Double-Button-1>', self.on_route_double_click)
         
         # Mausrad-Unterstützung hinzufügen
         self.routes_listbox.bind("<MouseWheel>", self._on_mousewheel)
@@ -215,8 +215,8 @@ class routen_menüpage(tk.Frame):
             import traceback
             traceback.print_exc()
 
-    def on_route_select(self, event):
-        """Event-Handler für Route-Auswahl in der Liste"""
+    def on_route_double_click(self, event):
+        """Event-Handler für Doppelklick auf Route in der Liste"""
         self.view_selected_route()
 
     def view_selected_route(self):

@@ -104,8 +104,8 @@ class standorte_menüpage(tk.Frame):
         v_scrollbar.config(command=self.standorte_listbox.yview)
         h_scrollbar.config(command=self.standorte_listbox.xview)
         
-        # Event-Handler für Standort-Auswahl hinzufügen
-        self.standorte_listbox.bind('<<ListboxSelect>>', self.on_standort_select)
+        # Event-Handler für Doppelklick auf Standort hinzufügen (statt einfacher Auswahl)
+        self.standorte_listbox.bind('<Double-Button-1>', self.on_standort_double_click)
         
         # Mausrad-Unterstützung hinzufügen
         self.standorte_listbox.bind("<MouseWheel>", self._on_mousewheel)
@@ -209,8 +209,8 @@ class standorte_menüpage(tk.Frame):
         except Exception as e:
             print(f"Fehler beim Setzen der Standard-Kartenposition: {e}")
 
-    def on_standort_select(self, event):
-        """Event-Handler für Standort-Auswahl in der Liste"""
+    def on_standort_double_click(self, event):
+        """Event-Handler für Doppelklick auf Standort in der Liste"""
         try:
             # Aktuelle Auswahl abrufen
             selection = self.standorte_listbox.curselection()
