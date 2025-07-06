@@ -14,7 +14,6 @@ from tkinter import ttk
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from start_stop import toggle_status
 from shutdown import system_shutdown
 
 OUTPUT_PATH = Path(__file__).parent
@@ -54,7 +53,7 @@ class routen_menüpage(tk.Frame):
         self.create_button("routen.png", 1280, 648, 
                            lambda: print("Routen clicked"), 640, 216)
         self.create_button("start_grau.png", 1280, 864, 
-                           lambda: toggle_status(), 640, 216) #funktion einfügen start tracking
+                           lambda: self.controller.show_frame(startpage), 640, 216) #funktion einfügen start tracking
 
         self.create_button("routen.png", 640.0, 0.0, 
                           lambda: print("Routen clicked"), 640.0, 216.0)

@@ -9,6 +9,8 @@ from PIL import Image
 import sys
 import os
 
+from pin import check_pin
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from shutdown import system_shutdown
@@ -26,7 +28,8 @@ class gesperrtpage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
-        
+        self.font = ("Inter", 36)
+
         self.canvas = tk.Canvas(
             self,
             bg="#363434",
@@ -44,9 +47,14 @@ class gesperrtpage(tk.Frame):
         self.create_button("ausschalten.png", 51.0, 929.0,
                           lambda: system_shutdown(), 100.0, 100.0) #ausschaltenfunktion einfügen
         
-        # Initialize and place the map widget on the left side of the lock screen
-        self.map_widget = MapWidget(self, width=1280, height=1080)
-        self.map_widget.place(x=0, y=0)
+        
+        self.canvas.create_rectangle(1425.0, 200.0, 1775.0, 363.0, fill="#FFFFFF", outline="#FFFFFF")
+        self.eingabe_pin = self.create_entry(1427.0, 202.0)
+    
+        
+        # Platzhalter für kartenfunktion - Meeting mit Hossein/Mohammed
+        self.karte_image = tk.PhotoImage(file=relative_to_assets("karte.png"))
+        self.canvas.create_image(640.0, 540.0, image=self.karte_image)
 
     def create_button(self, image_path, x, y, command, width, height):
         img = tk.PhotoImage(file=relative_to_assets(image_path))
@@ -62,81 +70,25 @@ class gesperrtpage(tk.Frame):
         btn.image = img  
         btn.place(x=x, y=y, width=width, height=height)
         return btn
+    
+    def create_entry(self, x, y):
+        entry = tk.Entry(
+            self,
+            bd=2,
+            bg="#363434",
+            fg="#FFFFFF",
+            highlightthickness=0,
+            justify="center",
+            font=self.font
+        )
+        entry.place(x=x, y=y, width=343.0, height=155.0)
+        return entry
 
     def handle_unlock(self):
         from start import startpage
-        print("Unlock attempt")
-        #einfügen des öffnen eines entry feldes
-        #import pin.py -check pin if else für pin abfrage
+        if(check_pin(self.eingabe_pin.get().strip())):{
         self.controller.show_frame(startpage)
-
-    def update_map_with_route(self, route_file=None):
-        """
-        Update the map with current route data
-        Call this method to show current tracking route on lock screen
-        """
-        if route_file and self.map_widget:
-            try:
-                self.map_widget.route(route_file)
-                print(f"Lock screen map updated with route: {route_file}")
-            except Exception as e:
-                print(f"Error updating lock screen map: {e}")
-
-    def on_show(self):
-        """
-        Called when lock screen is shown
-        Shows current simulation route ONLY if simulation is running
-        """
-        # Check if GPS simulation is running and show live data
-        try:
-            from tracking import trackingpage
-            if hasattr(self.controller, 'frames'):
-                tracking_frame = self.controller.frames.get(trackingpage)
-                if tracking_frame and tracking_frame.tracking and tracking_frame.route_points:
-                    # Show live simulation route
-                    if len(tracking_frame.route_points) > 1:
-                        self.map_widget.map_widget.set_path(tracking_frame.route_points, color="#0000FF", width=6)
-                    
-                    # Center camera on the latest GPS point immediately
-                    if tracking_frame.route_points:
-                        latest_lat, latest_lon = tracking_frame.route_points[-1]
-                        self.map_widget.map_widget.set_position(latest_lat, latest_lon)
-                        print(f"Lock screen camera initially centered on: {latest_lat:.6f}, {latest_lon:.6f}")
-                    
-                    print("Lock screen showing live simulation data")
-                    # Schedule regular updates while lock screen is active
-                    self.schedule_map_update()
-                    return
-        except Exception as e:
-            print(f"Error showing live simulation data: {e}")
-        
-        # If no simulation is running, clear any existing routes and show default map
-        try:
-            # Clear any existing paths on the map
-            self.map_widget.map_widget.delete_all_path()
-            print("No active simulation - showing default map view without routes")
-        except Exception as e:
-            print(f"Error clearing map paths: {e}")
-            # Map will show default position (Bonn)
-            
-    def schedule_map_update(self):
-        """Schedule regular map updates while lock screen is active"""
-        if hasattr(self, 'controller') and hasattr(self.controller, 'frames'):
-            try:
-                from tracking import trackingpage
-                tracking_frame = self.controller.frames.get(trackingpage)
-                if tracking_frame and tracking_frame.tracking and tracking_frame.route_points:
-                    # Update map with current route
-                    if len(tracking_frame.route_points) > 1:
-                        self.map_widget.map_widget.set_path(tracking_frame.route_points, color="#0000FF", width=6)
-                    
-                    # Center camera on the latest GPS point (like in tracking page)
-                    if tracking_frame.route_points:
-                        latest_lat, latest_lon = tracking_frame.route_points[-1]
-                        self.map_widget.map_widget.set_position(latest_lat, latest_lon)
-                        print(f"Lock screen camera centered on: {latest_lat:.6f}, {latest_lon:.6f}")
-                    
-                    # Schedule next update in 5 seconds if still tracking
-                    self.after(5000, self.schedule_map_update)
-            except Exception as e:
-                print(f"Error updating lock screen map: {e}")
+        }
+        else :{
+            print("Falsche PIN! Bitte erneut eingeben.")
+        }

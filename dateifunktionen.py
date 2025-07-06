@@ -221,7 +221,7 @@ def _parse_standort_file(filepath):
         return None
 
 
-def get_standorte(folder=STANDORTE_FOLDER, routendatei=None):
+def get_standorte(routendatei=None, folder=STANDORTE_FOLDER):
     """
     Gibt eine Liste aller .txt-Dateien (Standorte) im angegebenen Ordner zurück.
     Jedes Element der Liste ist ein Tupel: (Location, CustomName, Timestamp).

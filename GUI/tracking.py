@@ -16,6 +16,7 @@ from datetime import datetime
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from start_stop import toggle_status
 from shutdown import system_shutdown
 from map_widget import MapWidget
 import dateifunktionen

@@ -11,7 +11,6 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from start_stop import toggle_status
 from pin import change_pin
 
 OUTPUT_PATH = Path(__file__).parent
@@ -54,7 +53,7 @@ class pin_ändernpage(tk.Frame):
                            lambda: self.controller.show_frame(routen_menüpage), 640, 216)
         self.create_button("start_grau.png", 1280, 864, 
 
-                           lambda: toggle_status(), 640, 216) #funktion für das Starten des Trackens
+                           lambda: self.controller.show_frame(startpage), 640, 216) #funktion für das Starten des Trackens
         
 
         self.pin_ändern_text_image = tk.PhotoImage(file=relative_to_assets("text_pin_ändern.png"))

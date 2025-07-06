@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, font
 
 from mainapp import mainappclass
+from dateifunktionen import delete_routes
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"/GUI/assets")
@@ -16,3 +17,5 @@ def relative_to_assets(path: str) -> Path:
 if __name__ == "__main__":
     app = mainappclass()
     app.mainloop()
+
+    delete_routes(alter_in_tagen=100, base_folder="./")
