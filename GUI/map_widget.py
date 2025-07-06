@@ -30,9 +30,10 @@ class MapWidget:
         # Store markers for cleanup
         self.markers = []
         self.current_path = None
+        self.route_points = []
 
     def place(self, x=0, y=0):
-        """Place the map widget at specified coordinates"""
+        """Place the map widget at the specified position"""
         self.map_widget.place(x=x, y=y)
 
     def pack(self, **kwargs):
@@ -45,75 +46,169 @@ class MapWidget:
 
     def clear_map(self):
         """Clear all markers and paths from the map"""
-        # Clear markers
+        print("DEBUG MapWidget: Lösche Karte VOLLSTÄNDIG")
+        
+        # Clear all markers
         for marker in self.markers:
-            marker.delete()
+            try:
+                marker.delete()
+            except:
+                pass  # Marker already deleted or invalid
         self.markers.clear()
         
-        # Clear path
-        if self.current_path:
-            self.map_widget.delete_path(self.current_path)
-            self.current_path = None
+        # Clear ALL paths and markers using tkintermapview methods
+        try:
+            self.map_widget.delete_all_path()
+            print("DEBUG MapWidget: Alle Pfade gelöscht")
+        except Exception as e:
+            print(f"DEBUG MapWidget: Fehler beim Löschen der Pfade: {e}")
+            
+        try:
+            self.map_widget.delete_all_marker()
+            print("DEBUG MapWidget: Alle Marker gelöscht")
+        except Exception as e:
+            print(f"DEBUG MapWidget: Fehler beim Löschen der Marker: {e}")
+            
+        # Clear current path reference
+        self.current_path = None
+            
+        # Clear route points
+        self.route_points = []
+        
+        # Force map widget to update/refresh
+        try:
+            self.map_widget.update()
+            print("DEBUG MapWidget: Map Widget aktualisiert")
+        except Exception as e:
+            print(f"DEBUG MapWidget: Fehler beim Aktualisieren: {e}")
+        
+        print("DEBUG MapWidget: Karte vollständig geleert")
 
     def route(self, routendatei):
         """Zeigt die Route einer Routendatei samt all ihrer Standorte an. Bei Live Tracking wiederholt aufrufen zum aktualisieren."""
         try:
+            print(f"DEBUG MapWidget: Lade Route von {routendatei}")
+            
+            # Erst Karte komplett leeren
             self.clear_map()
+            
+            # Prüfe ob Datei existiert
+            if not os.path.exists(routendatei):
+                print(f"DEBUG MapWidget: Route-Datei existiert nicht: {routendatei}")
+                return
             
             self.route_points = dateifunktionen.routendatei_zu_liste(routendatei)
+            print(f"DEBUG MapWidget: {len(self.route_points) if self.route_points else 0} Route-Punkte geladen")
+            
             if self.route_points:
-                self.current_path = self.map_widget.set_path(self.route_points)
+                # Erstelle Pfad - in blau
+                self.current_path = self.map_widget.set_path(self.route_points, color="#0000FF", width=6)
+                print(f"DEBUG MapWidget: Pfad mit {len(self.route_points)} Punkten erstellt")
+                
+                # Zeige Standorte
                 self.standorte(routendatei)
                 
-                if len(self.route_points) > 1:
-                    deg_x, deg_y = self.route_points[len(self.route_points)-1]
-                    self.map_widget.set_position(deg_x, deg_y)
+                # Positioniere Karte auf den Mittelpunkt der Route
+                if len(self.route_points) > 0:
+                    # Berechne Mittelpunkt der Route
+                    center_lat = sum(point[0] for point in self.route_points) / len(self.route_points)
+                    center_lon = sum(point[1] for point in self.route_points) / len(self.route_points)
+                    
+                    # Setze Position und Zoom
+                    self.map_widget.set_position(center_lat, center_lon)
+                    
+                    # Berechne geeigneten Zoom basierend auf Route-Ausdehnung
+                    if len(self.route_points) > 1:
+                        lat_range = max(point[0] for point in self.route_points) - min(point[0] for point in self.route_points)
+                        lon_range = max(point[1] for point in self.route_points) - min(point[1] for point in self.route_points)
+                        
+                        # Einfache Zoom-Berechnung basierend auf der Ausdehnung
+                        max_range = max(lat_range, lon_range)
+                        if max_range > 0.01:  # Große Route
+                            zoom = 12
+                        elif max_range > 0.005:  # Mittlere Route
+                            zoom = 14
+                        else:  # Kleine Route
+                            zoom = 16
+                        
+                        self.map_widget.set_zoom(zoom)
+                        print(f"DEBUG MapWidget: Karte zentriert auf ({center_lat:.6f}, {center_lon:.6f}) mit Zoom {zoom}")
+                    else:
+                        print(f"DEBUG MapWidget: Karte positioniert auf einzelnen Punkt ({center_lat:.6f}, {center_lon:.6f})")
+                else:
+                    print("DEBUG MapWidget: Nur ein Route-Punkt vorhanden")
+                    
+                # Force refresh der Map
+                try:
+                    self.map_widget.update()
+                    self.map_widget.update_idletasks()
+                except:
+                    pass
+            else:
+                print("DEBUG MapWidget: Keine Route-Punkte gefunden")
         except Exception as e:
-            print(f"Error displaying route: {e}")
-
-    def standort(self, standortdatei):
-        """Zeigt einen einzelnen Standort auf der Karte (für Standortmenü)"""
-        try:
-            self.clear_map()
-            
-            data = dateifunktionen.parse_standort_file(standortdatei)
-            lat, lon = dateifunktionen.parse_coord_string_to_floats(data["location"])
-            marker = self.map_widget.set_marker(lat, lon)
-            
-            if data["custom_name"] == data["location"]: # Standort ist noch nicht benannt = Rot
-                marker.marker_color_circle = "red"
-            else: # Standort ist schon benannt = Braun
-                marker.marker_color_circle = "brown"
-                
-            self.markers.append(marker)
-            self.map_widget.set_position(lat, lon)
-        except Exception as e:
-            print(f"Error displaying location: {e}")
+            print(f"DEBUG MapWidget: Fehler beim Anzeigen der Route: {e}")
+            import traceback
+            traceback.print_exc()
 
     def standorte(self, routendatei):
         """Display all locations from a route file"""
         try:
+            # **1. Klassische Standorte laden** (aus Standorte-Ordner)
             standortliste = dateifunktionen.get_standorte(routendatei=routendatei)
+            print(f"DEBUG MapWidget: {len(standortliste)} klassische Standorte für Route gefunden")
+            
             for i, dummy in enumerate(standortliste):
                 coords, name, time = standortliste[i]
                 lat, lon = dateifunktionen.parse_coord_string_to_floats(coords)
-                marker = self.map_widget.set_marker(lat, lon, text=name)
-                
-                if name: # Standort ist schon benannt
-                    marker.marker_color_circle = "brown"
-                else: # Neuer Standort
-                    marker.marker_color_circle = "red"
+                if lat is not None and lon is not None:
+                    marker = self.map_widget.set_marker(lat, lon, text=name if name else "Unbenannt")
                     
-                self.markers.append(marker)
+                    if name: # Standort ist schon benannt
+                        marker.marker_color_circle = "brown"
+                    else: # Neuer Standort
+                        marker.marker_color_circle = "red"
+                        
+                    self.markers.append(marker)
+                    print(f"DEBUG MapWidget: Klassischer Marker: {name if name else 'Unbenannt'} bei ({lat:.6f}, {lon:.6f})")
+            
+            # **2. Neue Standorte aus Route-Datei laden** (detected_standorte)
+            self.load_route_standorte(routendatei)
+            
         except Exception as e:
-            print(f"Error displaying locations: {e}")
+            print(f"DEBUG MapWidget: Fehler beim Anzeigen der Standorte: {e}")
+
+    def load_route_standorte(self, routendatei):
+        """Load standorte directly from route file metadata"""
+        try:
+            import json
+            
+            with open(routendatei, 'r') as f:
+                route_data = json.load(f)
+            
+            # Prüfe ob es das neue Format mit detected_standorte ist
+            if isinstance(route_data, dict) and 'detected_standorte' in route_data:
+                detected_standorte = route_data['detected_standorte']
+                print(f"DEBUG MapWidget: {len(detected_standorte)} Standorte aus Route-Datei gefunden")
+                
+                for standort in detected_standorte:
+                    lat = standort['latitude']
+                    lon = standort['longitude']
+                    
+                    # Marker mit nur "Längerer Aufenthalt" erstellen
+                    marker = self.map_widget.set_marker(lat, lon, text="Längerer Aufenthalt")
+                    marker.marker_color_circle = "orange"  # Orange für Route-Standorte
+                    
+                    self.markers.append(marker)
+                    print(f"DEBUG MapWidget: Route-Standort: Längerer Aufenthalt bei ({lat:.6f}, {lon:.6f})")
+            else:
+                print("DEBUG MapWidget: Keine detected_standorte in Route-Datei gefunden")
+                
+        except Exception as e:
+            print(f"DEBUG MapWidget: Fehler beim Laden der Route-Standorte: {e}")
 
     def set_position(self, lat, lon, zoom=None):
         """Set map position"""
         self.map_widget.set_position(lat, lon)
         if zoom:
             self.map_widget.set_zoom(zoom)
-
-    def set_zoom(self, zoom):
-        """Set map zoom level"""
-        self.map_widget.set_zoom(zoom)

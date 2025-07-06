@@ -64,7 +64,7 @@ class routenpage(tk.Frame):
         # platzhalter dateiaufruf json
         self.canvas.create_rectangle(
             1282.0, 218.0, 1918.0, 773.0,
-            fill="#000000", outline=""
+            fill="#363434", outline=""
         )
 
         self.create_button("routen_löschen.png", 1459.0, 782.0,
@@ -94,5 +94,18 @@ class routenpage(tk.Frame):
         """
         Display a specific route on the map
         """
+        print(f"DEBUG Routen: display_route aufgerufen mit {route_file}")
         if route_file and self.map_widget:
-            self.map_widget.route(route_file)
+            if os.path.exists(route_file):
+                print(f"DEBUG Routen: Route-Datei existiert, lade Route...")
+                # Stelle sicher, dass das Map-Widget bereit ist
+                self.map_widget.clear_map()
+                # Nach kurzer Verzögerung die Route laden
+                self.after(50, lambda: self.map_widget.route(route_file))
+            else:
+                print(f"DEBUG Routen: Route-Datei existiert nicht: {route_file}")
+        else:
+            if not route_file:
+                print("DEBUG Routen: Keine Route-Datei übergeben")
+            if not self.map_widget:
+                print("DEBUG Routen: Map-Widget nicht initialisiert")

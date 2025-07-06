@@ -134,3 +134,29 @@ try:
     dateifunktionen.delete_routes(alter_in_tagen=int(alter))
 except:
     print("delete_routes-Test abgebrochen: ungültige Eingabe")
+
+print("\nCHRONOLOGISCHE ROUTENLISTE (alle verfügbaren Routen, sortiert nach Datum):")
+try:
+    alle_routen = dateifunktionen.get_all_routes_sorted()
+    if alle_routen:
+        print(f"Insgesamt {len(alle_routen)} Routen gefunden:")
+        for route_info in alle_routen:
+            print(f"  - {route_info['display_name']}")
+            print(f"    Pfad: {route_info['file_path']}")
+    else:
+        print("Keine Routen gefunden.")
+except Exception as e:
+    print(f"Fehler beim Laden der chronologischen Routenliste: {e}")
+
+print("\nVERFÜGBARE DATUMSORDNER:")
+try:
+    datumsordner = dateifunktionen.get_all_route_folders()
+    if datumsordner:
+        print(f"Insgesamt {len(datumsordner)} Datumsordner mit Routen gefunden:")
+        for ordner_pfad, ordner_datum, ordner_name in datumsordner:
+            json_dateien = [f for f in os.listdir(ordner_pfad) if f.endswith('.json')]
+            print(f"  - {ordner_name} ({len(json_dateien)} Routen)")
+    else:
+        print("Keine Datumsordner mit Routen gefunden.")
+except Exception as e:
+    print(f"Fehler beim Laden der Datumsordner: {e}")

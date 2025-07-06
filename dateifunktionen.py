@@ -634,6 +634,7 @@ def delete_routes(alter_in_tagen=100, base_folder="."):
 def routendatei_zu_liste(routendatei):
     """
     Lädt eine JSON-Routendatei und konvertiert sie in eine Liste von Koordinaten-Tupeln.
+    Unterstützt sowohl altes Format (Liste) als auch neues Format (Metadaten-Objekt).
     
     Args:
         routendatei (str): Pfad zur JSON-Routendatei
@@ -645,18 +646,39 @@ def routendatei_zu_liste(routendatei):
         with open(routendatei, 'r', encoding='utf-8') as f:
             route_data = json.load(f)
         
-        if not isinstance(route_data, list):
-            print(f"Warnung: Routendatei '{routendatei}' enthält keine Liste.")
+        coordinates_list = []
+        
+        # Handle new format with metadata
+        if isinstance(route_data, dict) and 'route_data' in route_data:
+            points = route_data['route_data']
+            for entry in points:
+                if isinstance(entry, dict):
+                    lat = entry.get('latitude')
+                    lon = entry.get('longitude')
+                    if lat is not None and lon is not None:
+                        coordinates_list.append((float(lat), float(lon)))
+        
+        # Handle old format (list of points)
+        elif isinstance(route_data, list):
+            for entry in route_data:
+                if isinstance(entry, dict):
+                    # New simulation format with direct lat/lon
+                    if "latitude" in entry and "longitude" in entry:
+                        lat = entry["latitude"]
+                        lon = entry["longitude"]
+                        if lat is not None and lon is not None:
+                            coordinates_list.append((float(lat), float(lon)))
+                    # Old format with coord string
+                    elif "coord" in entry:
+                        coord_str = entry["coord"]
+                        lat, lon = _parse_coord_string_to_floats(coord_str)
+                        if lat is not None and lon is not None:
+                            coordinates_list.append((lat, lon))
+        else:
+            print(f"Warnung: Routendatei '{routendatei}' hat unbekanntes Format.")
             return []
         
-        coordinates_list = []
-        for entry in route_data:
-            if isinstance(entry, dict) and "coord" in entry:
-                coord_str = entry["coord"]
-                lat, lon = _parse_coord_string_to_floats(coord_str)
-                if lat is not None and lon is not None:
-                    coordinates_list.append((lat, lon))
-        
+        print(f"DEBUG: Loaded {len(coordinates_list)} coordinates from {routendatei}")
         return coordinates_list
         
     except FileNotFoundError:
@@ -674,3 +696,148 @@ def parse_coord_string_to_floats(coord_str):
     Öffentliche Version der _parse_coord_string_to_floats Funktion für externen Zugriff.
     """
     return _parse_coord_string_to_floats(coord_str)
+
+def get_all_route_folders(base_folder="."):
+    """
+    Gibt eine chronologisch sortierte Liste aller Datumsordner zurück,
+    die Routendateien enthalten.
+    
+    Args:
+        base_folder (str): Der Basisordner, in dem nach Datumsordnern gesucht wird
+        
+    Returns:
+        list: Liste von Pfaden zu Datumsordnern, chronologisch sortiert (neueste zuerst)
+    """
+    route_folders = []
+    
+    if not os.path.isdir(base_folder):
+        return route_folders
+        
+    for item_name in os.listdir(base_folder):
+        item_path = os.path.join(base_folder, item_name)
+        if os.path.isdir(item_path):
+            try:
+                # Versuche den Ordnernamen als Datum zu parsen
+                folder_date = datetime.strptime(item_name, "%Y-%m-%d").date()
+                # Prüfe, ob der Ordner JSON-Dateien enthält
+                has_json_files = any(f.endswith('.json') for f in os.listdir(item_path))
+                if has_json_files:
+                    route_folders.append((item_path, folder_date, item_name))
+            except ValueError:
+                # Ordnername entspricht nicht dem Datumsformat, ignorieren
+                pass
+    
+    # Chronologisch sortieren (neueste zuerst)
+    route_folders.sort(key=lambda x: x[1], reverse=True)
+    return route_folders
+
+
+def get_all_routes_sorted(base_folder="."):
+    """
+    Gibt alle verfügbaren Routen zurück, sortiert nach Datum und Zeit.
+    
+    Args:
+        base_folder (str): Der Basisordner, in dem nach Routenordnern gesucht wird
+        
+    Returns:
+        list: Liste von Dictionaries mit Routeninformationen:
+              {
+                  'folder_date': 'YYYY-MM-DD',
+                  'file_path': 'vollständiger Pfad zur JSON-Datei',
+                  'file_name': 'Dateiname ohne Endung',
+                  'start_time': 'Startzeit der Route',
+                  'end_time': 'Endzeit der Route',
+                  'num_points': Anzahl der GPS-Punkte,
+                  'display_name': 'Formatierter Anzeigename'
+              }
+    """
+    all_routes = []
+    route_folders = get_all_route_folders(base_folder)
+    
+    for folder_path, folder_date, folder_name in route_folders:
+        try:
+            json_files = [f for f in os.listdir(folder_path) if f.endswith('.json')]
+            
+            for json_file in json_files:
+                json_path = os.path.join(folder_path, json_file)
+                
+                try:
+                    with open(json_path, 'r', encoding='utf-8') as f:
+                        route_data = json.load(f)
+                    
+                    # Support both old format (list of points) and new format (metadata object)
+                    if isinstance(route_data, dict) and 'route_data' in route_data:
+                        # New format with metadata
+                        points = route_data['route_data']
+                        num_points = route_data.get('points_count', len(points))
+                        start_time = route_data.get('start_time', 'Unbekannt')
+                        end_time = route_data.get('end_time', 'Unbekannt')
+                        simulation_type = route_data.get('simulation_type', 'GPS_Tracking')
+                    elif isinstance(route_data, list):
+                        # Old format (list of points)
+                        points = route_data
+                        num_points = len(points)
+                        start_time = "Unbekannt"
+                        end_time = "Unbekannt"
+                        simulation_type = "GPS_Tracking"
+                        
+                        if points:
+                            start_time = points[0].get('time', 'Unbekannt')
+                            end_time = points[-1].get('time', 'Unbekannt')
+                    else:
+                        continue  # Unknown format
+                        
+                    route_name = os.path.splitext(json_file)[0]
+                    
+                    # Format display name with simulation type info
+                    display_name = f"{folder_name} - {route_name}"
+                    if start_time != 'Unbekannt':
+                        try:
+                            # Try to format the timestamp nicely
+                            if 'T' in start_time:  # ISO format
+                                dt = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
+                                formatted_time = dt.strftime("%H:%M:%S")
+                            else:
+                                formatted_time = start_time[:8] if len(start_time) >= 8 else start_time
+                            display_name += f" ({formatted_time})"
+                        except:
+                            display_name += f" ({start_time[:19]})"
+                    
+                    display_name += f" - {num_points} Punkte"
+                    if simulation_type == "GPS_Simulation":
+                        display_name += " [Simulation]"
+                    
+                    route_info = {
+                        'folder_date': folder_name,
+                        'file_path': os.path.abspath(json_path),  # Stelle sicher, dass der Pfad absolut ist
+                        'file_name': route_name,
+                        'start_time': start_time,
+                        'end_time': end_time,
+                        'num_points': num_points,
+                        'display_name': display_name
+                    }
+                    
+                    all_routes.append(route_info)
+                    
+                except (json.JSONDecodeError, Exception) as e:
+                    print(f"Fehler beim Laden der Route '{json_path}': {e}")
+                    continue
+                    
+        except Exception as e:
+            print(f"Fehler beim Durchsuchen des Ordners '{folder_path}': {e}")
+            continue
+    
+    # Sortiere nach Datum und dann nach Startzeit (neueste zuerst)
+    def sort_key(route):
+        try:
+            folder_date = datetime.strptime(route['folder_date'], "%Y-%m-%d").date()
+            if route['start_time'] != 'Unbekannt':
+                start_datetime = _parse_string_to_utc_datetime(route['start_time'])
+                return (folder_date, start_datetime)
+            else:
+                return (folder_date, datetime.min.replace(tzinfo=timezone.utc))
+        except (ValueError, Exception):
+            return (datetime.min.date(), datetime.min.replace(tzinfo=timezone.utc))
+    
+    all_routes.sort(key=sort_key, reverse=True)
+    return all_routes

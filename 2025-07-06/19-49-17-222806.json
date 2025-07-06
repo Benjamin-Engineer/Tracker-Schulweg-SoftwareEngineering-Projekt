@@ -1,0 +1,71 @@
+{
+  "start_time": "2025-07-06T19:49:21.377253",
+  "end_time": "2025-07-06T19:50:11.377262",
+  "points_count": 10,
+  "duration_seconds": 50,
+  "simulation_type": "GPS_Simulation",
+  "has_stationary_points": false,
+  "detected_standorte": [],
+  "route_data": [
+    {
+      "latitude": 50.7295842,
+      "longitude": 7.1088298,
+      "timestamp": 1751824161.377253,
+      "step": 1
+    },
+    {
+      "latitude": 50.7297397,
+      "longitude": 7.1087234,
+      "timestamp": 1751824166.377253,
+      "step": 2
+    },
+    {
+      "latitude": 50.7298854,
+      "longitude": 7.1086262,
+      "timestamp": 1751824171.377253,
+      "step": 3
+    },
+    {
+      "latitude": 50.73001751428571,
+      "longitude": 7.1085391,
+      "timestamp": 1751824176.377253,
+      "step": 4
+    },
+    {
+      "latitude": 50.73014962857143,
+      "longitude": 7.108452,
+      "timestamp": 1751824181.377253,
+      "step": 5
+    },
+    {
+      "latitude": 50.730281742857144,
+      "longitude": 7.1083649,
+      "timestamp": 1751824186.377253,
+      "step": 6
+    },
+    {
+      "latitude": 50.73041385714286,
+      "longitude": 7.1082778,
+      "timestamp": 1751824191.377253,
+      "step": 7
+    },
+    {
+      "latitude": 50.73054597142857,
+      "longitude": 7.1081907,
+      "timestamp": 1751824196.377253,
+      "step": 8
+    },
+    {
+      "latitude": 50.73067808571429,
+      "longitude": 7.1081036,
+      "timestamp": 1751824201.377253,
+      "step": 9
+    },
+    {
+      "latitude": 50.7308102,
+      "longitude": 7.1080165,
+      "timestamp": 1751824206.377253,
+      "step": 10
+    }
+  ]
+}

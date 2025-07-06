@@ -77,7 +77,7 @@ class routen_menüpage(tk.Frame):
                           lambda: self.delete_selected_route(), 280.0, 97.67442321777344)
 
         self.create_button("einklappen.png", 425.0, 0.0,
-                          lambda: self.view_selected_route(), 215.0, 216.0)
+                          lambda: self.controller.show_frame(startpage), 215.0, 216.0)
 
         self.create_button("zurück.png", 819.0, 930.0,
                           lambda: self.controller.show_frame(startpage), 280.0, 97.67442321777344)
@@ -85,6 +85,18 @@ class routen_menüpage(tk.Frame):
         self.canvas.create_rectangle(638.0, 216.0, 642.0, 1080.0, fill="#FFFFFF", outline="")
 
         # Lade die Routen für das aktuelle Datum
+        self.load_routes()
+
+    def _on_mousewheel(self, event):
+        """Handle vertical mouse wheel scrolling"""
+        self.routes_listbox.yview_scroll(int(-1*(event.delta/120)), "units")
+    
+    def _on_horizontal_mousewheel(self, event):
+        """Handle horizontal mouse wheel scrolling (Shift + mouse wheel)"""
+        self.routes_listbox.xview_scroll(int(-1*(event.delta/120)), "units")
+
+    def on_show(self):
+        """Wird aufgerufen, wenn die Seite angezeigt wird"""
         self.load_routes()
 
     def create_button(self, image_path, x, y, command, width, height):
@@ -105,97 +117,122 @@ class routen_menüpage(tk.Frame):
     def setup_routes_list(self):
         """Erstellt die Routen-Liste mit Scrollbar"""
         # Frame für die Routen-Liste
-        list_frame = tk.Frame(self, bg="#000000")
+        list_frame = tk.Frame(self, bg="#363434")
         list_frame.place(x=642, y=218, width=636, height=555)
         
-        # Scrollbar
-        scrollbar = ttk.Scrollbar(list_frame)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        # Vertikale Scrollbar
+        v_scrollbar = ttk.Scrollbar(list_frame, orient="vertical")
+        v_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Horizontale Scrollbar
+        h_scrollbar = ttk.Scrollbar(list_frame, orient="horizontal")
+        h_scrollbar.pack(side=tk.BOTTOM, fill=tk.X)
         
         # Listbox für die Routen
         self.routes_listbox = tk.Listbox(
             list_frame,
-            yscrollcommand=scrollbar.set,
-            bg="#000000",
+            yscrollcommand=v_scrollbar.set,
+            xscrollcommand=h_scrollbar.set,
+            bg="#363434",
             fg="#FFFFFF",
             selectbackground="#555555",
             selectforeground="#FFFFFF",
-            font=("Arial", 12),
+            font=("Inter", 24),
             relief="flat",
             borderwidth=0,
             highlightthickness=0
         )
         self.routes_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        scrollbar.config(command=self.routes_listbox.yview)
         
-        # Titel für die Liste
-        title_label = tk.Label(
+        # Scrollbars konfigurieren
+        v_scrollbar.config(command=self.routes_listbox.yview)
+        h_scrollbar.config(command=self.routes_listbox.xview)
+        
+        # Event-Handler für Auswahl in der Liste hinzufügen
+        self.routes_listbox.bind('<<ListboxSelect>>', self.on_route_select)
+        
+        # Mausrad-Unterstützung hinzufügen
+        self.routes_listbox.bind("<MouseWheel>", self._on_mousewheel)
+        self.routes_listbox.bind("<Shift-MouseWheel>", self._on_horizontal_mousewheel)
+        
+        # Titel für die Liste (als Attribut speichern)
+        self.title_label = tk.Label(
             self,
-            text=f"Routen vom {datetime.now().strftime('%Y-%m-%d')}",
+            text="Lade Routen...",
             bg="#363434",
             fg="#FFFFFF",
             font=("Arial", 14, "bold")
         )
-        title_label.place(x=642, y=190)
+        self.title_label.place(x=642, y=190)
 
     def load_routes(self):
-        """Lädt die verfügbaren Routen für das aktuelle Datum"""
+        """Lädt alle verfügbaren Routen, chronologisch sortiert (neueste zuerst)"""
         try:
-            # Aktuelles Datum für Ordnername
-            current_date = datetime.now().strftime('%Y-%m-%d')
-            routes_dir = Path(__file__).parent.parent / current_date
+            # Pfad zum übergeordneten Verzeichnis (wo sich die Datumsordner befinden)
+            base_dir = Path(__file__).parent.parent
             
             self.routes_listbox.delete(0, tk.END)
             self.route_files = []
             
-            if routes_dir.exists():
-                # Alle JSON-Dateien im Datumsordner finden
-                json_files = list(routes_dir.glob("*.json"))
+            # Lade alle Routen chronologisch sortiert
+            import sys
+            if str(base_dir) not in sys.path:
+                sys.path.append(str(base_dir))
+            
+            try:
+                import dateifunktionen
+                all_routes = dateifunktionen.get_all_routes_sorted(str(base_dir))
                 
-                for json_file in sorted(json_files):
-                    # Route-Information aus JSON-Datei laden
-                    try:
-                        with open(json_file, 'r', encoding='utf-8') as f:
-                            route_data = json.load(f)
+                if all_routes:
+                    print(f"DEBUG: Gefundene Routen: {len(all_routes)}")
+                    for i, route_info in enumerate(all_routes):
+                        display_name = route_info['display_name']
+                        file_path = route_info['file_path']  # Sollte bereits absolut sein
                         
-                        # Routeninformationen anzeigen
-                        route_name = json_file.stem  # Dateiname ohne Endung
-                        num_points = len(route_data)
+                        print(f"DEBUG: Route {i}: {display_name}")
+                        print(f"DEBUG: Pfad: {file_path}")
+                        print(f"DEBUG: Datei existiert: {os.path.exists(file_path)}")
                         
-                        # Start- und Endzeit extrahieren
-                        if route_data:
-                            start_time = route_data[0].get('time', 'Unbekannt')
-                            end_time = route_data[-1].get('time', 'Unbekannt')
-                            
-                            # Formatierte Anzeige
-                            display_text = f"{route_name} ({num_points} Punkte)"
-                            if start_time != 'Unbekannt':
-                                display_text += f" - {start_time[:19]}"
-                        else:
-                            display_text = f"{route_name} (Leere Route)"
+                        self.routes_listbox.insert(tk.END, display_name)
+                        self.route_files.append(file_path)
                         
-                        self.routes_listbox.insert(tk.END, display_text)
-                        self.route_files.append(str(json_file))
+                    # Aktualisiere den Titel
+                    if hasattr(self, 'title_label'):
+                        self.title_label.config(text=f"Alle Routen ({len(all_routes)} gefunden)")
+                else:
+                    self.routes_listbox.insert(tk.END, "Keine Routen verfügbar")
+                    if hasattr(self, 'title_label'):
+                        self.title_label.config(text="Keine Routen verfügbar")
                         
-                    except (json.JSONDecodeError, Exception) as e:
-                        # Fehlerhafte Dateien überspringen
-                        self.routes_listbox.insert(tk.END, f"{json_file.name} (Fehler beim Laden)")
-                        self.route_files.append(None)
-                
-                if not json_files:
-                    self.routes_listbox.insert(tk.END, "Keine Routen für heute verfügbar")
-            else:
-                self.routes_listbox.insert(tk.END, "Ordner für heutiges Datum nicht gefunden")
+            except ImportError as ie:
+                error_msg = f"Import-Fehler: {str(ie)}"
+                print(f"DEBUG: {error_msg}")
+                self.routes_listbox.insert(tk.END, error_msg)
                 
         except Exception as e:
-            self.routes_listbox.insert(tk.END, f"Fehler beim Laden der Routen: {str(e)}")
+            error_msg = f"Fehler beim Laden der Routen: {str(e)}"
+            print(f"DEBUG: {error_msg}")
+            self.routes_listbox.insert(tk.END, error_msg)
+            import traceback
+            traceback.print_exc()
+
+    def on_route_select(self, event):
+        """Event-Handler für Route-Auswahl in der Liste"""
+        self.view_selected_route()
 
     def view_selected_route(self):
         """Zeigt die ausgewählte Route in der Kartenseite an"""
         selection = self.routes_listbox.curselection()
-        if selection and len(self.route_files) > selection[0]:
+        print(f"DEBUG: Selection: {selection}")
+        print(f"DEBUG: Anzahl route_files: {len(self.route_files) if hasattr(self, 'route_files') else 'Nicht initialisiert'}")
+        
+        if selection and hasattr(self, 'route_files') and len(self.route_files) > selection[0]:
             route_file = self.route_files[selection[0]]
-            if route_file:
+            selected_text = self.routes_listbox.get(selection[0])
+            print(f"DEBUG: Ausgewählte Route: {selected_text}")
+            print(f"DEBUG: Route-Datei: {route_file}")
+            
+            if route_file and os.path.exists(route_file):
                 # Zur Routen-Ansichtsseite wechseln und Route anzeigen
                 from routen import routenpage
                 routes_page = None
@@ -207,12 +244,25 @@ class routen_menüpage(tk.Frame):
                         break
                 
                 if routes_page:
-                    routes_page.display_route(route_file)
+                    print(f"DEBUG: Zeige Route an: {route_file}")
+                    # Erst zur Seite wechseln
                     self.controller.show_frame(routenpage)
+                    # Dann mit after() die Route nach dem Frame-Switch laden
+                    self.after(100, lambda: routes_page.display_route(route_file))
+                else:
+                    print("DEBUG: Routenpage nicht gefunden")
             else:
-                print("Ausgewählte Route kann nicht geladen werden")
+                if not route_file:
+                    print("DEBUG: Route-Datei ist None")
+                else:
+                    print(f"DEBUG: Route-Datei existiert nicht: {route_file}")
         else:
-            print("Bitte wählen Sie eine Route aus")
+            if not selection:
+                print("DEBUG: Keine Route ausgewählt")
+            elif not hasattr(self, 'route_files'):
+                print("DEBUG: route_files Attribut nicht vorhanden")
+            else:
+                print(f"DEBUG: Selection Index außerhalb des Bereichs: {selection[0]} >= {len(self.route_files)}")
 
     def delete_selected_route(self):
         """Löscht die ausgewählte Route"""

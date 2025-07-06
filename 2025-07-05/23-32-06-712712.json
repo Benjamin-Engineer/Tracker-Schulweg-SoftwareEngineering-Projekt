@@ -1,0 +1,40 @@
+{
+  "start_time": "2025-07-05T23:32:07.990511",
+  "end_time": "2025-07-05T23:32:32.990523",
+  "points_count": 5,
+  "duration_seconds": 25,
+  "simulation_type": "GPS_Simulation",
+  "has_stationary_points": false,
+  "route_data": [
+    {
+      "latitude": 50.7454201,
+      "longitude": 7.0860484,
+      "timestamp": 1751751127.990511,
+      "step": 1
+    },
+    {
+      "latitude": 50.745323400000004,
+      "longitude": 7.0862162,
+      "timestamp": 1751751132.990511,
+      "step": 2
+    },
+    {
+      "latitude": 50.7452267,
+      "longitude": 7.086384,
+      "timestamp": 1751751137.990511,
+      "step": 3
+    },
+    {
+      "latitude": 50.74535394,
+      "longitude": 7.08648057,
+      "timestamp": 1751751142.990511,
+      "step": 4
+    },
+    {
+      "latitude": 50.745481180000006,
+      "longitude": 7.08657714,
+      "timestamp": 1751751147.990511,
+      "step": 5
+    }
+  ]
+}

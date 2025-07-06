@@ -51,7 +51,7 @@ class startpage(tk.Frame):
         self.create_button("einstellungen.png", 1280, 216, lambda: controller.show_frame(einstellungenpage), 640, 216)
         self.create_button("standorte.png", 1280, 432, lambda: controller.show_frame(standorte_menüpage), 640, 216)
         self.create_button("routen.png", 1280, 648, lambda: controller.show_frame(routen_menüpage), 640, 216)
-        self.create_button("start.png", 1280, 864, lambda: toggle_status(), 640, 216) #funktion einfügen start tracking
+        self.create_button("start.png", 1280, 864, lambda: self.start_simulation_and_tracking(), 640, 216)
         self.create_button("ausschalten.png", 51, 929, lambda: system_shutdown(), 100, 100)
 
     def create_button(self, image_path, x, y, command, width, height):
@@ -67,3 +67,18 @@ class startpage(tk.Frame):
         )
         btn.image = img
         btn.place(x=x, y=y, width=width, height=height)
+
+    def start_simulation_and_tracking(self):
+        """Start GPS simulation and switch to tracking page"""
+        from tracking import trackingpage
+        
+        # Get the tracking page frame
+        tracking_frame = self.controller.frames[trackingpage]
+        
+        # Start the GPS simulation
+        tracking_frame.start_gps_simulation()
+        
+        # Switch to tracking page
+        self.controller.show_frame(trackingpage)
+        
+        print("GPS simulation started, switched to tracking page")

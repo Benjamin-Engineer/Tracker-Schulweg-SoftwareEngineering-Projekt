@@ -1,0 +1,4 @@
+tkintermapview
+osmnx
+networkx
+Pillow

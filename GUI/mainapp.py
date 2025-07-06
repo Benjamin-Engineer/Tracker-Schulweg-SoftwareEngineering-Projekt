@@ -58,11 +58,23 @@ class mainappclass(tk.Tk):
 
     def show_frame(self, page_class):
         frame = self.frames[page_class]
-        frame.tkraise()                    
+        frame.tkraise()
+        
+        # If showing the lock screen, update it with current route data
+        if page_class == gesperrtpage and hasattr(frame, 'on_show'):
+            frame.on_show()
+        
+        # If showing the standorte menu, refresh the standorte list
+        from standorte_menü import standorte_menüpage
+        if page_class == standorte_menüpage and hasattr(frame, 'on_show'):
+            frame.on_show()                    
 
     def reset_timer(self, event=None):
         if self.timer_id is not None:
             self.after_cancel(self.timer_id)
         self.timer_id = self.after(self.timeout, lambda: self.show_frame(gesperrtpage))
 
-        
+    def schedule_simulation_timer(self, callback):
+        """Schedule a simulation timer callback to run every 5 seconds"""
+        self.after(5000, callback)
+
